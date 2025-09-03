@@ -6,33 +6,56 @@
         body {
             font-family: Arial, sans-serif;
             margin: 20px;
+            line-height: 1.6;
+        }
+        h1, h2 {
+            margin-top: 30px;
         }
         .image-row {
             display: flex;
             gap: 15px; /* space between images */
             margin-bottom: 20px;
+            flex-wrap: wrap;
         }
         .image-row img {
             border-radius: 8px;
-            max-width: 45%; /* keeps them side by side */
+            max-width: 45%; /* side by side */
             height: auto;
         }
     </style>
 </head>
 <body>
     <h1>Project 0</h1>
-    <p>This is my first project. Below are some images I uploaded:</p>
 
-    <!-- Row 1 -->
+    <!-- Part 1 -->
+    <h2>Part 1: Selfie — The Wrong Way vs. The Right Way</h2>
+    <p>
+        How camera distance and zoom affect portrait distortion. 
+        A close-up selfie produces a distorted look, while stepping back and zooming in produces 
+        a more natural result. Both portraits are roughly the same size but look very different.
+    </p>
     <div class="image-row">
-        <img src="Proj_0/media/dt.jpeg" alt="Downtown">
-        <img src="Proj_0/media/dtzoom.jpeg" alt="Downtown Zoom">
+        <img src="./media/mir.jpeg" alt="Close-up portrait of Miranda">
+        <img src="./media/mirzoom.jpeg" alt="Zoomed-in portrait of Miranda">
     </div>
 
-    <!-- Row 2 -->
+    <!-- Part 2 -->
+    <h2>Part 2: Architectural Perspective Compression</h2>
+    <p>
+        This part demonstrates perspective compression in an urban setting. 
+    </p>
     <div class="image-row">
-        <img src="Proj_0/media/mir.jpeg" alt="Miranda">
-        <img src="Proj_0/media/mirzoom.jpeg" alt="Miranda Zoom">
+        <img src="./media/dt.jpeg" alt="Street compressed">
+        <img src="./media/dtzoom.jpeg" alt="Street natural">
+    </div>
+
+    <!-- Part 3 -->
+    <h2>Part 3: The Dolly Zoom</h2>
+    <p>
+        In this part, we reproduce the famous <em>dolly zoom</em> effect. 
+    </p>
+    <div class="image-row">
+        <img src="./media/a4xbzl.gif" alt="Dolly Zoom GIF">
     </div>
 </body>
 </html>
