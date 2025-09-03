@@ -9,6 +9,7 @@
             line-height: 1.6;
             background-color: #fafafa;
             color: #333;
+            text-align: left; /* make the body text left aligned */
         }
         h1 {
             text-align: center;
@@ -16,25 +17,25 @@
             margin-bottom: 10px;
         }
         h2 {
-            text-align: left;   /* left aligned subtitles */
+            text-align: left;   /* subtitles left aligned */
             margin-top: 40px;
             margin-bottom: 15px;
             color: #222;
         }
         p {
             max-width: 800px;
-            margin: 0 auto 25px auto;
-            text-align: center;
+            margin: 0 0 25px 0;  /* no auto-centering */
+            text-align: left;    /* left aligned paragraphs */
         }
         .image-row {
             display: flex;
-            justify-content: center;
+            justify-content: center; /* keeps images centered */
             gap: 30px;
             margin-bottom: 40px;
             flex-wrap: wrap;
         }
         figure {
-            text-align: center;
+            text-align: center; /* center captions under each img */
             flex: 1;
             max-width: 350px;
         }
