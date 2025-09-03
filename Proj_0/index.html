@@ -7,19 +7,32 @@
             font-family: Arial, sans-serif;
             margin: 20px;
         }
-        img {
-            margin-top: 15px;
+        .image-row {
+            display: flex;
+            gap: 15px; /* space between images */
+            margin-bottom: 20px;
+        }
+        .image-row img {
             border-radius: 8px;
-            max-width: 100%;
+            max-width: 45%; /* keeps them side by side */
+            height: auto;
         }
     </style>
 </head>
 <body>
     <h1>Project 0</h1>
-    <p>This is my first project. Below is an image I uploaded:</p>
-    <img src=/Users/yuxuancai/cs180/cs180/Proj_0/media/dt.HEIC alt="My uploaded picture">
-    <img src=/Users/yuxuancai/cs180/cs180/Proj_0/media/dtzoom.HEIC alt="My uploaded picture">
-    <img src=/Users/yuxuancai/cs180/cs180/Proj_0/media/miranda.HEIC alt="My uploaded picture">
-    <img src=/Users/yuxuancai/cs180/cs180/Proj_0/media/mirandazoom.HEIC alt="My uploaded picture">
+    <p>This is my first project. Below are some images I uploaded:</p>
+
+    <!-- Row 1 -->
+    <div class="image-row">
+        <img src="Proj_0/media/dt.jpeg" alt="Downtown">
+        <img src="Proj_0/media/dtzoom.jpeg" alt="Downtown Zoom">
+    </div>
+
+    <!-- Row 2 -->
+    <div class="image-row">
+        <img src="Proj_0/media/mir.jpeg" alt="Miranda">
+        <img src="Proj_0/media/mirzoom.jpeg" alt="Miranda Zoom">
+    </div>
 </body>
 </html>
