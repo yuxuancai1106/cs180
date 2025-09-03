@@ -1,31 +1,337 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>My Portfolio</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CS180 Portfolio</title>
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #ffeaa7 0%, #fab1a0 100%);
+            min-height: 100vh;
+            padding: 20px;
+            line-height: 1.6;
         }
-        h1 {
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+        }
+
+        .header {
+            background: linear-gradient(135deg, #ff7400 0%, #fd8b17 100%);
+            color: white;
+            padding: 60px 40px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+            animation: float 6s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(180deg); }
+        }
+
+        .header h1 {
+            font-size: 3.5rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+            position: relative;
+            z-index: 1;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .header p {
+            font-size: 1.3rem;
+            opacity: 0.9;
+            position: relative;
+            z-index: 1;
+            font-weight: 300;
+        }
+
+        .content {
+            padding: 60px 40px;
+        }
+
+        .intro {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+
+        .intro p {
+            font-size: 1.2rem;
+            color: #2d3436;
             margin-bottom: 20px;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
         }
-        .projects a {
+
+        .projects {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
+            margin-top: 40px;
+        }
+
+        .project-card {
+            background: white;
+            border-radius: 15px;
+            padding: 0;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .project-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .project-image {
+            height: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .project-0 {
+            background: linear-gradient(135deg, #ffeaa7 0%, #fdcb6e 100%);
+        }
+
+        .project-1 {
+            background: linear-gradient(135deg, #ff7400 0%, #fd8b17 100%);
+        }
+
+        .project-2 {
+            background: linear-gradient(135deg, hsl(30, 80%, 59%) 0%, #ffa242 100%);
+        }
+
+        .project-3 {
+            background: linear-gradient(135deg, #ffa242 0%, #ffc367 100%);
+        }
+
+        .project-4 {
+            background: linear-gradient(135deg, #ffc367 0%, #f9de8a 100%);
+        }
+
+        .project-5 {
+            background: linear-gradient(135deg, #f9de8a 0%, #ffeaa7 100%);
+        }
+
+        .project-image::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="rgba(255,255,255,0.1)"/><circle cx="75" cy="75" r="1" fill="rgba(255,255,255,0.1)"/><circle cx="50" cy="10" r="0.5" fill="rgba(255,255,255,0.1)"/><circle cx="10" cy="60" r="0.5" fill="rgba(255,255,255,0.1)"/><circle cx="90" cy="40" r="0.5" fill="rgba(255,255,255,0.1)"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+            opacity: 0.3;
+        }
+
+        .project-icon {
+            font-size: 4rem;
+            color: white;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            position: relative;
+            z-index: 1;
+        }
+
+        .project-info {
+            padding: 30px;
+        }
+
+        .project-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #2d3436;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .project-description {
+            color: #636e72;
+            margin-bottom: 25px;
+            text-align: center;
+            line-height: 1.6;
+        }
+
+        .project-link {
             display: block;
-            margin: 5px 0;
+            background: linear-gradient(135deg, #00b894 0%, #00a085 100%);
+            color: white;
             text-decoration: none;
-            color: blue;
+            padding: 15px 30px;
+            border-radius: 25px;
+            text-align: center;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
         }
-        .projects a:hover {
-            text-decoration: underline;
+
+        .project-link::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
         }
-    </style>
+
+        .project-link:hover::before {
+            left: 100%;
+        }
+
+        .project-link:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0, 184, 148, 0.3);
+        }
+
+        .footer {
+            background: #2d3436;
+            color: white;
+            text-align: center;
+            padding: 30px;
+            margin-top: 50px;
+        }
+
+        .footer p {
+            opacity: 0.8;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2.5rem;
+            }
+            
+            .header p {
+                font-size: 1.1rem;
+            }
+            
+            .content {
+                padding: 40px 20px;
+            }
+            
+            .projects {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style> 
 </head>
 <body>
-    <h1>Welcome to My CS180 Portfolio!</h1>
-    <div class="projects">
-        <a href="./Proj_0/index.html">Project 0</a>
-        <a href="./Proj_1/index.html">Project 1</a>
+    <div class="container">
+        <div class="header">
+            <h1>Welcome to My CS180 Portfolio!</h1>
+            <p>Showcasing my projects from the CS180 course</p>
+        </div>
+        
+        <div class="content">
+            <div class="intro">
+                <p>This portfolio contains the projects I've completed as part of my CS180 coursework. Each project demonstrates different programming concepts and techniques I've learned throughout the course.</p>
+                <p>Click on the project cards below to explore my work.</p>
+            </div>
+            
+            <div class="projects">
+                <div class="project-card">
+                    <div class="project-image project-0">
+                        <div class="project-icon">📷</div>
+                    </div>
+                    <div class="project-info">
+                        <h3 class="project-title">Project 0: Becoming Friends with Your Camera</h3>
+                        <p class="project-description">An introduction to computer vision and image processing fundamentals.</p>
+                        <a href="./Proj_0/index.html" class="project-link">View Project 0</a>
+                    </div>
+                </div>
+                
+                <div class="project-card">
+                    <div class="project-image project-1">
+                        <div class="project-icon">🎨</div>
+                    </div>
+                    <div class="project-info">
+                        <h3 class="project-title">Project 1: Images of the Russian Empire</h3>
+                        <p class="project-description">Colorizing the Prokudin-Gorskii Photo Collection using image alignment and color reconstruction techniques.</p>
+                        <a href="./Proj_1/index.html" class="project-link">Coming Soon</a>
+                    </div>
+                </div>
+
+                <div class="project-card">
+                    <div class="project-image project-2">
+                        <div class="project-icon">🔍</div>
+                    </div>
+                    <div class="project-info">
+                        <h3 class="project-title">Project 2: Fun with Filters and Frequencies</h3>
+                        <p class="project-description">Exploring image filtering, frequency domain processing, and creating hybrid images.</p>
+                        <a href="./Proj_2/index.html" class="project-link">Coming Soon</a>
+                    </div>
+                </div>
+
+                <div class="project-card">
+                    <div class="project-image project-3">
+                        <div class="project-icon">👥</div>
+                    </div>
+                    <div class="project-info">
+                        <h3 class="project-title">Project 3: Face Morphing and Modelling</h3>
+                        <p class="project-description">Creating face morphing animations and modeling photo collections using geometric transformations.</p>
+                        <a href="./Proj_3/index.html" class="project-link">Coming Soon</a>
+                    </div>
+                </div>
+
+                <div class="project-card">
+                    <div class="project-image project-4">
+                        <div class="project-icon">🧩</div>
+                    </div>
+                    <div class="project-info">
+                        <h3 class="project-title">Project 4: Auto-stitching and Photo Mosaics</h3>
+                        <p class="project-description">Implementing automatic image stitching and creating panoramic photo mosaics.</p>
+                        <a href="./Proj_4/index.html" class="project-link">Coming Soon</a>
+                    </div>
+                </div>
+
+                <div class="project-card">
+                    <div class="project-image project-5">
+                        <div class="project-icon">✨</div>
+                    </div>
+                    <div class="project-info">
+                        <h3 class="project-title">Project 5: Fun with Diffusion Models</h3>
+                        <p class="project-description">Exploring modern diffusion models for image generation and manipulation.</p>
+                        <a href="./Proj_5/index.html" class="project-link">Coming Soon</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>&copy; 2024 CS180 Portfolio. Built with passion for computer science.</p>
+        </div>
     </div>
 </body>
 </html>
