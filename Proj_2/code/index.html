@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Project 2: Convolution and Finite Differences — CS180</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        margin: 0;
+        padding: 40px;
+        line-height: 1.7;
+        background: linear-gradient(135deg, #f5f5f5 0%, #e0e0e0 100%);
+        min-height: 100vh;
+        color: #333;
+    }
+    .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 20px;
+        padding: 60px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        backdrop-filter: blur(10px);
+    }
+    header {
+        display: flex;
+        align-items: center;
+        gap: 30px;
+        margin-bottom: 50px;
+        padding-bottom: 30px;
+        border-bottom: 3px solid #666;
+    }
+    .header-text h1 { 
+        font-size: 2.5rem; 
+        margin: 0; 
+        color: #2c3e50;
+        font-weight: 700;
+        background: linear-gradient(135deg, #666, #999);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+    .header-text .subtitle {
+        font-size: 1.1rem;
+        color: #666;
+        margin-top: 8px;
+        font-weight: 500;
+    }
+    h2 { 
+        margin-top: 50px; 
+        margin-bottom: 25px; 
+        color: #2c3e50; 
+        font-size: 1.8rem;
+        font-weight: 600;
+        padding: 15px 25px;
+        background: linear-gradient(135deg, #f9f9f9, #e9e9e9);
+        border-radius: 12px;
+        border-left: 5px solid #666;
+    }
+    h3 { 
+        margin-top: 35px; 
+        color: #444; 
+        font-size: 1.3rem;
+        font-weight: 600;
+        border-bottom: 2px solid #eee;
+        padding-bottom: 8px;
+    }
+    h4 {
+        color: #555;
+        font-size: 1.1rem;
+        margin-top: 25px;
+        font-weight: 600;
+    }
+    p { 
+        color: #444; 
+        font-size: 1.05rem;
+        margin-bottom: 20px;
+        text-align: justify;
+    }
+    ul, ol {
+        color: #444;
+        font-size: 1.05rem;
+        line-height: 1.8;
+    }
+    li {
+        margin-bottom: 8px;
+    }
+    .image-row { 
+        display: flex; 
+        gap: 30px; 
+        flex-wrap: wrap; 
+        justify-content: center; 
+        margin: 40px 0; 
+    }
+    figure { 
+        width: 280px; 
+        text-align: center; 
+        margin: 0;
+        background: white;
+        border-radius: 15px;
+        padding: 20px;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    figure:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+    }
+    figure img { 
+        border-radius: 12px; 
+        max-width: 100%; 
+        height: auto;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+    figcaption { 
+        font-size: 0.95rem; 
+        color: #666; 
+        margin-top: 15px;
+        font-weight: 500;
+    }
+    pre { 
+        background: #f8f9fa; 
+        padding: 20px; 
+        border-radius: 10px; 
+        border: 1px solid #e9ecef; 
+        overflow-x: auto;
+        font-size: 0.95rem;
+        box-shadow: inset 0 2px 4px rgba(0,0,0,0.06);
+    }
+    code {
+        background: #f1f3f4;
+        padding: 2px 6px;
+        border-radius: 4px;
+        font-family: 'Courier New', monospace;
+        font-size: 0.9rem;
+        color: #c7254e;
+    }
+    .bells-whistles {
+        background: linear-gradient(135deg, #fff9e6, #fff2cc);
+        border-left: 4px solid #ffa500;
+        padding: 20px;
+        margin: 30px 0;
+        border-radius: 8px;
+    }
+    .key-insight {
+        background: linear-gradient(135deg, #e8f5e8, #d4edda);
+        border-left: 4px solid #28a745;
+        padding: 20px;
+        margin: 30px 0;
+        border-radius: 8px;
+    }
+    .missing-section {
+        background: linear-gradient(135deg, #ffe6e6, #ffcccc);
+        border: 2px dashed #dc3545;
+        padding: 20px;
+        margin: 30px 0;
+        border-radius: 8px;
+        text-align: center;
+        font-style: italic;
+    }
+</style>
+</head>
+<body>
+
+<div class="container">
+<header>
+    <div class="header-text">
+        <h1>Exploring Computer Vision Through Convolution</h1>
+        <div class="subtitle">CS180: A Journey Through Image Processing Fundamentals — Project #2</div>
+    </div>
+</header>
+
+<h2>Introduction</h2>
+<p>
+This project explores fundamental computer vision techniques through hands-on implementation of convolution operations, edge detection, image enhancement, and frequency-domain manipulation. We build core algorithms from scratch, analyze their computational properties, and demonstrate their applications in creating visually compelling effects like hybrid images and seamless image blending. The work progresses from basic mathematical operations to sophisticated multi-scale image processing techniques used in modern computational photography.
+</p>
+
+<h2>Part 1: Understanding Convolution and Edge Detection</h2>
+
+<h3>Part 1.1 — Building Convolution from the Ground Up</h3>
+
+<h4>Methodology</h4>
+<p>
+I implemented three versions of 2D convolution to understand the performance spectrum: a naive 4-loop approach for educational clarity, a vectorized 2-loop version for moderate optimization, and comparison against SciPy's highly optimized implementation. Using a grayscale selfie as the test image, I applied various kernels including a 9×9 box filter for blurring and derivative filters (Dx, Dy) for edge detection.
+</p>
+
+<pre>
+def conv2d_naive(image, kernel, padding=True):
+    ih, iw = image.shape
+    kh, kw = kernel.shape
+    ph, pw = (kh // 2, kw // 2) if padding else (0, 0)
+    padded = pad_image(image, ph, pw)
+    out = np.zeros((ih, iw) if padding else (ih - kh + 1, iw - kw + 1))
+    kflip = np.flip(kernel, axis=(0, 1))  # Convolution requires kernel flip
+    
+    for i in range(out.shape[0]):
+        for j in range(out.shape[1]):
+            for m in range(kh):
+                for n in range(kw):
+                    out[i, j] += kflip[m, n] * padded[i + m, j + n]
+    return out
+</pre>
+
+<div class="image-row">
+    <figure>
+        <img src="./outputs/part1_1_grayscale.jpg" alt="Original Grayscale">
+        <figcaption>Original grayscale selfie (500×500px)</figcaption>
+    </figure>
+    <figure>
+        <img src="./outputs/part1_1_box_naive.jpg" alt="Box Filter Result">
+        <figcaption>Box filter result - notice the smoothing effect</figcaption>
+    </figure>
+    <figure>
+        <img src="./outputs/part1_1_dx.jpg" alt="Horizontal Edges">
+        <figcaption>Dx filter highlighting vertical structures</figcaption>
+    </figure>
+    <figure>
+        <img src="./outputs/part1_1_dy.jpg" alt="Vertical Edges">
+        <figcaption>Dy filter highlighting horizontal structures</figcaption>
+    </figure>
+</div>
+
+<div class="key-insight">
+<h4>Key Findings</h4>
+<p>The performance gap was dramatic: 4-loop implementation (5.28s) → 2-loop vectorized (0.54s) → SciPy FFT-based (0.02s). All methods produced identical results (verified with np.allclose), proving that algorithmic optimization doesn't sacrifice accuracy. The derivative filters successfully extracted directional edges, with Dx emphasizing vertical boundaries and Dy emphasizing horizontal ones, this can be especially seen around the eye area and hair of the selfie.</p>
+</div>
+
+<h3>Part 1.2 — Finite Difference Edge Detection</h3>
+
+
+<h4>Methodology</h4>
+<p>
+Using the classic cameraman image, I computed gradients with simple finite difference kernels: Dx = [1, -1] and Dy = [[1], [-1]]. The gradient magnitude was calculated as √(Dx² + Dy²), then binarized using a threshold of 0.1 to create an edge map.
+</p>
+
+<div class="image-row">
+    <figure>
+        <img src="./outputs/part1_2_cameraman.jpg" alt="Cameraman Original">
+        <figcaption>Cameraman image (542×540px)</figcaption>
+    </figure>
+    <figure>
+        <img src="./outputs/part1_2_dx.jpg" alt="Dx Gradient">
+        <figcaption>Horizontal gradient (Dx)</figcaption>
+    </figure>
+    <figure>
+        <img src="./outputs/part1_2_dy.jpg" alt="Dy Gradient">
+        <figcaption>Vertical gradient (Dy)</figcaption>
+    </figure>
+    <figure>
+        <img src="./outputs/part1_2_edges.jpg" alt="Edge Map">
+        <figcaption>Binarized edge map (threshold = 0.1)</figcaption>
+    </figure>
+</div>
+
+<h4>Analysis</h4>
+<p>
+The finite difference approach successfully identified major structural boundaries—the cameraman's silhouette, camera outline, and tripod legs are clearly visible. However, the edge map also contains significant noise, particularly in textured regions. This motivates the need for preprocessing with Gaussian smoothing, explored in Part 1.3.
+</p>
+
+<h3>Part 1.3 — Derivative of Gaussian (DoG) Filtering</h3>
+
+<h4>Methodology</h4>
+<p>
+I implemented two mathematically equivalent approaches: (1) blur first, then differentiate, and (2) create DoG filters by convolving Gaussian kernels with derivative operators. Using a 9×9 Gaussian kernel (σ=2), I applied both methods to the cameraman image and verified their equivalence.
+</p>
+
+<div class="image-row">
+    <figure>
+        <img src="./outputs/part1_3_gaussian.jpg" alt="Gaussian Smoothed">
+        <figcaption>Gaussian smoothed (σ=2, reduces noise)</figcaption>
+    </figure>
+    <figure>
+        <img src="./outputs/part1_3_dx_gaussian.jpg" alt="DoG Dx">
+        <figcaption>DoG horizontal gradient (much cleaner)</figcaption>
+    </figure>
+    <figure>
+        <img src="./outputs/part1_3_dy_gaussian.jpg" alt="DoG Dy">
+        <figcaption>DoG vertical gradient</figcaption>
+    </figure>
+    <figure>
+        <img src="./outputs/part1_3_edges_gaussian.jpg" alt="Clean Edges">
+        <figcaption>Clean edge map with DoG preprocessing</figcaption>
+    </figure>
+</div>
+
+<div class="bells-whistles">
+<h4>Bells & Whistles: Gradient Orientation Visualization</h4>
+<p>
+I created an HSV visualization where hue encodes gradient direction (0° = red, 90° = green, 180° = cyan, 270° = blue), saturation is fixed at maximum, and value represents gradient magnitude. This reveals the rich directional structure in natural images.
+</p>
+
+<div class="image-row">
+    <figure>
+        <img src="./outputs/part1_3_hsv.jpg" alt="HSV Gradient Orientation">
+        <figcaption>HSV gradient orientation map</figcaption>
+    </figure>
+</div>
+</div>
+
+<div class="key-insight">
+<h4>Key Findings</h4>
+<p>Gaussian preprocessing dramatically improved edge quality by suppressing noise while preserving important structural boundaries. The DoG approach is mathematically elegant—it combines smoothing and differentiation into a single convolution operation. Gradient orientation visualization reveals that natural images contain rich directional patterns invisible to simple edge magnitude maps.</p>
+</div>
+
+<h2>Part 2: Advanced Image Processing Techniques</h2>
+
+<h3>Part 2.1 — Unsharp Masking for Image Enhancement</h3>
+
+
+<h4>Methodology</h4>
+<p>
+The unsharp masking algorithm works by: (1) creating a low-pass filtered version of the image, (2) subtracting this from the original to extract high-frequency details, and (3) adding back these high frequencies with amplification factor α. I implemented both multi-step and single-convolution approaches, then evaluated performance on both sharp and artificially blurred images.
+</p>
+
+<pre>
+def unsharp_mask(image, gaussian_kernel, alpha):
+    low_freq = convolve2d(image, gaussian_kernel, mode='same')
+    high_freq = image - low_freq
+    sharpened = image + alpha * high_freq
+    return np.clip(sharpened, 0, 1)
+</pre>
+
+<div class="image-row">
+    <figure>
+        <img src="./outputs/part2_1_original_color.jpg" alt="Original Taj">
+        <figcaption>Original Taj Mahal image</figcaption>
+    </figure>
+    <figure>
+        <img src="./outputs/part2_1_sharpened_color.jpg" alt="Sharpened Result">
+        <figcaption>Sharpened result (α=3.0, σ=0.5)</figcaption>
+    </figure>
+    <figure>
+        <img src="./outputs/part2_1_high_freq_color.jpg" alt="High Frequencies">
+        <figcaption>High-frequency details (+0.5 offset for visibility)</figcaption>
+    </figure>
+</div>
+
+<h4>Extended Evaluation: Multiple Image Types</h4>
+<p>
+To demonstrate the versatility of unsharp masking across different content types, I tested the algorithm on additional images with varying characteristics—portraits and architectural scenes. Each image type responds differently to sharpening parameters.
+</p>
+
+<div class="image-row">
+    <figure>
+        <img src="./outputs/young_me_original.jpg" alt="Young Me Original">
+        <figcaption>Young Me: Original portrait with fine facial details</figcaption>
+    </figure>
+    <figure>
+        <img src="./outputs/young_me_sharpened.jpg" alt="Young Me Sharpened">
+        <figcaption>Young Me: Enhanced with unsharp masking (α=3.0)</figcaption>
+    </figure>
+    <figure>
+        <img src="./outputs/campanile_original.jpg" alt="Campanile Original">
+        <figcaption>Campanile: Sharp architectural original</figcaption>
+    </figure>
+    <figure>
+        <img src="./outputs/campanile_blurred.jpg" alt="Campanile Blurred">
+        <figcaption>Campanile: Artificially blurred (σ=2.5)</figcaption>
+    </figure>
+    <figure>
+        <img src="./outputs/campanile_blur_then_sharpen.jpg" alt="Campanile Recovery">
+        <figcaption>Campanile: Recovery attempt via sharpening</figcaption>
+    </figure>
+</div>
+
+<h4>Analysis</h4>
+<p>
+The results reveal important insights about unsharp masking effectiveness across different image types. The portrait demonstrates successful enhancement of facial features and texture details. The blur-then-sharpen experiment with the Campanile shows that while sharpening can partially recover architectural edges from blurred images, it cannot fully restore the original clarity—this demonstrates that blur operations permanently discard high-frequency information that cannot be perfectly reconstructed.
+</p>
+
+<div class="key-insight">
+<h4>Key Findings</h4>
+<p>Unsharp masking effectively enhanced perceived sharpness by amplifying edge transitions and fine details. The technique works best on images that are already reasonably sharp—applying it to heavily blurred images can enhance noise and artifacts. Parameter tuning is crucial: higher α values increase sharpening strength but risk over-enhancement.</p>
+</div>
+
+<h3>Part 2.2 — Hybrid Images: Frequency-Based Visual Illusions</h3>
+
+
+<h4>Methodology</h4>
+<p>
+Following Oliva, Torralba, and Schyns (2006), I created hybrid images by combining the low-frequency content of one image with the high-frequency content of another. The process involves: (1) careful alignment of source images, (2) low-pass filtering one image with a Gaussian kernel, (3) high-pass filtering the other by subtracting its Gaussian-blurred version, and (4) averaging the results.
+</p>
+
+<h4>Complete Hybrid Image Pipeline</h4>
+<p>
+To demonstrate the full hybrid image creation process, I present a comprehensive visualization showing every step from aligned inputs to final result, including frequency domain analysis and parameter justification.
+</p>
+
+<div class="image-row">
+    <figure>
+        <img src="./images/derek_nutmeg_complete_pipeline.jpg" alt="Complete Hybrid Pipeline">
+        <figcaption>Complete pipeline for Derek-Nutmeg hybrid: spatial domain processing (top), frequency analysis (middle), and parameter justification (bottom)</figcaption>
+    </figure>
+</div>
+
+<h4>Parameter Selection Rationale</h4>
+<p>
+The cutoff frequencies were chosen through systematic experimentation: σ₁=2 for high-pass filtering preserves fine facial features visible up close, while σ₂=6 for low-pass filtering maintains the overall shape and form visible from distance. The frequency domain analysis confirms successful separation—high frequencies dominate the center of the spectrum while low frequencies provide the overall structure.
+</p>
+<h4>Character-Based Hybrid Analysis</h4>
+<p>
+These character-based hybrids reveal interesting insights about cross-domain image processing. The Mbappé-Ninja Turtle combination (σ_high=2.5, σ_low=8) successfully bridges photographic realism with cartoon stylization—close viewing reveals human facial features while distant viewing emphasizes the distinctive turtle mask coloring. The Shrek-Donkey hybrid (σ_high=3.0, σ_low=9) works within the same animated domain but transforms between different character archetypes. Both demonstrate that hybrid images can create compelling visual narratives that shift based on viewing distance, though cartoon-to-cartoon morphs tend to produce smoother transitions than photo-to-cartoon combinations due to similar visual styles and color palettes.
+</p>
+
+<div class="image-row">
+    <figure>
+        <img src="./images/part2_2_hybrid1.jpg" alt="Derek-Cat Hybrid">
+        <figcaption>Hybrid 1: Derek (high-freq) + Cat (low-freq)</figcaption>
+    </figure>
+    <figure>
+        <img src="./images/part2_2_freq_derek.jpg" alt="Derek FFT">
+        <figcaption>Fourier transform of Derek image</figcaption>
+    </figure>
+    <figure>
+        <img src="./images/part2_2_freq_hybrid.jpg" alt="Hybrid FFT">
+        <figcaption>Fourier transform of hybrid result</figcaption>
+    </figure>
+</div>
+
+<h4>Personal Hybrid Image Creations</h4>
+<p>
+Beyond the provided test images, I created hybrid images using popular culture characters to explore different scenarios and demonstrate the versatility of the technique across various visual styles and content types.
+</p>
+
+<h4>Hybrid 1: Nimbappe Turtle</h4>
+<div class="image-row">
+    <figure>
+        <img src="./images/personal_hybrid1_img1_aligned.jpg" alt="Mbappé Original">
+        <figcaption>Mbappé: Original aligned (high-frequency source)</figcaption>
+    </figure>
+    <figure>
+        <img src="./images/personal_hybrid1_img2_aligned.jpg" alt="Ninja Turtle Original">
+        <figcaption>Ninja Turtle: Original aligned (low-frequency source)</figcaption>
+    </figure>
+    <figure>
+        <img src="./images/personal_hybrid1_result.jpg" alt="Mbappé-Turtle Hybrid">
+        <figcaption>Mbappé-Ninja Turtle: Realistic features close-up, cartoon mask from distance</figcaption>
+    </figure>
+</div>
+
+<h4>Hybrid 2: Shrek-Donkey</h4>
+<div class="image-row">
+    <figure>
+        <img src="./images/personal_hybrid2_img1_aligned.jpg" alt="Shrek Original">
+        <figcaption>Shrek: Original aligned (high-frequency source)</figcaption>
+    </figure>
+    <figure>
+        <img src="./images/personal_hybrid2_img2_aligned.jpg" alt="Donkey Original">
+        <figcaption>Donkey: Original aligned (low-frequency source)</figcaption>
+    </figure>
+    <figure>
+        <img src="./images/personal_hybrid2_result.jpg" alt="Shrek-Donkey Hybrid">
+        <figcaption>Shrek-Donkey: Ogre details close-up, donkey shape from distance</figcaption>
+    </figure>
+</div>
+
+<div class="bells-whistles">
+<h4>Bells & Whistles: Color vs. Grayscale Experiments</h4>
+<p>
+I experimented with different color strategies: using color for high-frequency components only, low-frequency only, and both. Results showed that color in high-frequency details helps them dominate close-up perception, while color in low-frequency components improves distant visibility. The optimal strategy depends on the specific image content and desired effect strength.
+</p>
+</div>
+
+<h3>Part 2.3 — Gaussian and Laplacian Stacks</h3>
+
+<h4>Methodology</h4>
+<p>
+I constructed Gaussian stacks by iteratively applying Gaussian blurs without downsampling, preserving the original image dimensions at each level. Laplacian stacks were created by computing differences between consecutive Gaussian levels, capturing band-pass frequency information. This decomposition enables seamless blending in Part 2.4.
+</p>
+
+<div class="image-row">
+    <figure>
+        <img src="./images/outputs/part2_3_stacks.jpg" alt="Stack Visualization">
+        <figcaption>Gaussian and Laplacian stacks showing frequency decomposition of apple and orange images</figcaption>
+    </figure>
+</div>
+
+
+<h3>Part 2.4 — Multiresolution Blending: The Modern Orapple</h3>
+
+<h4>Methodology</h4>
+<p>
+Following Burt and Adelson (1983), I implemented pyramid-based blending by: (1) decomposing both source images into Laplacian stacks, (2) creating a Gaussian stack for the blending mask, (3) blending each Laplacian level using the corresponding mask level, and (4) reconstructing the final image by summing the blended pyramid levels.
+</p>
+
+<div class="image-row">
+    <figure>
+        <img src="./images/outputs/part2_4_oraple.jpg" alt="Orapple Result">
+        <figcaption>The classic Orapple: seamless apple-orange blend</figcaption>
+    </figure>
+    <figure>
+        <img src="./images/outputs/part3_3_freqs.jpg" alt="Frequency Analysis">
+        <figcaption>Frequency analysis showing blending process</figcaption>
+    </figure>
+</div>
+
+<h4>Personal Blending Examples</h4>
+<p>
+To expand on the Oraple blend, I created two custom blends: one with a vertical/horizontal seam and one with an irregular circular mask, showcasing the versatility of multiresolution blending.</p>
+
+<h4>Personal Blend 1: Building Day/Night (Vertical Seam)</h4>
+<div class="image-row">
+    <figure>
+        <img src="./images/building_day.jpg" alt="Building Day">
+        <figcaption>Original day image</figcaption>
+    </figure>
+    <figure>
+        <img src="./images/building_night.jpg" alt="Building Night">
+        <figcaption>Original night image</figcaption>
+    </figure>
+    <figure>
+        <img src="./images/outputs/personal_blend1_result.jpg" alt="Day/Night Blend">
+        <figcaption>Seamless day-night blend with a vertical transition</figcaption>
+    </figure>
+    <figure>
+        <img src="./images/outputs/personal_blend1_process.jpg" alt="Vertical Mask">
+        <figcaption>Blending Process of Buildign HuangheLou</figcaption>
+    </figure>
+</div>
+<p>The vertical seam blend transitions smoothly between day and night images, achieved by using a vertical mask with a wide transition zone (transition=200) and a Gaussian blur (kernel=101×101, sigma=20) to ensure a natural gradient without artifacts.</p>
+
+<h4>Personal Blend 2: Tiger-Lion (Circular Mask)</h4>
+<div class="image-row">
+    <figure>
+        <img src="./images/tiger.jpeg" alt="Tiger Face">
+        <figcaption>Original tiger image</figcaption>
+    </figure>
+    <figure>
+        <img src="./images/lionn.jpeg" alt="Lion Face">
+        <figcaption>Original lion image</figcaption>
+    </figure>
+    <figure>
+        <img src="./images/outputs/personal_blend3_result.jpg" alt="Tiger-Lion Blend">
+        <figcaption>Tiger face blended into lion background with a circular mask</figcaption>
+    </figure>
+    <figure>
+        <img src="./images/outputs/personal_blend3_process.jpg" alt="Circular Mask">
+        <figcaption>Circular mask used for blending</figcaption>
+    </figure>
+</div>
+<p>For the circular mask blend, I initially set the center at (w//2, h//4) to position the tiger's face upward, with a radius of min(w, h) // 7 for a small circle. To reduce noise and blurriness at the sides, I adjusted the Gaussian blur from a 201×201 kernel with sigma=50 to a 101×101 kernel with sigma=15, creating a sharper transition. Later, I shifted the center to (w//2, h//3) to lower the circle slightly, aligning it better with the tiger's facial features. I also experimented with increasing the radius to min(w, h) // 3, which enlarged the blend, but reverted to min(w, h) // 6 to maintain a controlled size while enhancing the tiger's intensity with a 1.2x weight inside the mask and reducing the lion's influence with a 0.8x weight outside. This iterative adjustment ensured a clean, focused blend with the tiger's face prominently displayed within the circular area.</p>
+
+<div class="bells-whistles">
+<h4>Bells & Whistles: Irregular Mask Blending</h4>
+<p>
+Beyond simple vertical seams, irregular masks enable creative compositing. The circular mask for the tiger-lion blend demonstrates how adjusting the center and radius, along with mask smoothing, can produce a natural transition. The key insight is that the mask's Gaussian stack must smoothly interpolate between regions to avoid artifacts, which I achieved by fine-tuning the blur parameters.</p>
+</div>
+
+<div class="key-insight">
+<h4>Key Findings</h4>
+<p>Multiresolution blending successfully eliminates seam artifacts by handling different frequency bands appropriately. Low frequencies blend smoothly across wide transitions, while high frequencies maintain local detail integrity. This technique forms the foundation of modern computational photography applications like panorama stitching and focus stacking.</p>
+</div>
+
+<h2>Reflection: The Most Important Thing I Learned</h2>
+
+<div class="key-insight">
+<p>
+The most profound insight from this project was understanding how frequency-domain thinking revolutionizes image processing. Initially, I viewed images as collections of pixels to be manipulated locally. However, working with Fourier transforms, Gaussian filtering, and multiresolution techniques revealed that images are rich signals with frequency content that can be selectively modified.
+</p>
+
+<p>
+This frequency perspective explains why seemingly unrelated techniques—edge detection, image sharpening, hybrid images, and seamless blending—all rely on similar mathematical foundations. Whether we're isolating edges with high-pass filters, creating visual illusions through frequency separation, or blending images across multiple scales, we're fundamentally decomposing and recomposing the frequency spectrum of visual information.
+</p>
+
+<p>
+The practical impact extends beyond this course: these concepts underlie modern computational photography, from smartphone portrait mode to professional panorama stitching. Understanding the "why" behind these algorithms—not just the "how"—provides a foundation for tackling novel image processing challenges.
+</p>
+</div>
+
+</div>
+</body>
+</html>
