@@ -186,7 +186,6 @@ def process_image(imgname, use_pyramid=None, show_result=False, metric='ncc', us
         aligned_g, g_shift, _ = align_single_scale(g, b, metric=metric, use_edges=use_edges)
         aligned_r, r_shift, _ = align_single_scale(r, b, metric=metric, use_edges=use_edges)
 
-    # Print offsets like the example
     print(f"G:{g_shift}, R:{r_shift}")
 
     # combine into rgb image
@@ -197,8 +196,8 @@ def process_image(imgname, use_pyramid=None, show_result=False, metric='ncc', us
     img_out = auto_contrast(img_out)
 
     # save result
-    output_name = f"result_{imgname.split('/')[-1].split('.')[0]}.jpg" # Ensure image is in correct format for saving
-    img_out_save = np.clip(img_out, 0, 1) # Clip to valid range
+    output_name = f"result_{imgname.split('/')[-1].split('.')[0]}.jpg"
+    img_out_save = np.clip(img_out, 0, 1) 
     img_out_save = (img_out_save * 255).astype(np.uint8) # Convert to uint8
     skio.imsave(output_name, img_out_save)
     print(f"Saved result to {output_name}")
@@ -213,10 +212,6 @@ if __name__ == "__main__":
     # data directory (contains input images)
     data_dir = '/Users/yuxuancai/cs180/cs180/Proj_1/code/img'
 
-    # Modes:
-    # 1) python main.py "<image_path>" -> process single image
-    # 2) python main.py all -> process all jpg/tif in data_dir
-    # 3) python main.py -> default to batch in data_dir
 
     def list_images_in_dir(directory: str):
         patterns = ["*.jpg", "*.jpeg", "*.tif", "*.tiff", "*.png"]
@@ -226,7 +221,6 @@ if __name__ == "__main__":
         # Sort for deterministic order
         return sorted(files)
 
-    # Determine mode based on CLI args
     if len(sys.argv) > 1:
         arg = sys.argv[1]
         if arg.lower() == 'all':
@@ -234,7 +228,6 @@ if __name__ == "__main__":
         else:
             image_list = [arg]
     else:
-        # No args: process all images in data_dir
         image_list = list_images_in_dir(data_dir)
 
     if not image_list:

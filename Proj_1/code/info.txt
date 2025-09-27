@@ -40,13 +40,13 @@ Image size: (2596, 3025), Using pyramid: True, Metric: ncc, Edges: True
 G:(-17, 41), R:(-29, 92)
 Saved result to out_lugano.jpg
 
-Image size: (2593, 3016), Using pyramid: True, Metric: ncc, Edges: True
-G:(10, 80), R:(15, 134)
-Saved result to out_melons.jpg
+Image size: (3241, 3770), Using pyramid: True, Metric: ncc, Edges: True
+G:(10, 80), R:(13, 177)
+Saved result to out4_melons.jpg
 
-Image size: (2601, 3048), Using pyramid: True, Metric: ncc, Edges: True
-G:(29, 78), R:(38, 134)
-Saved result to out_self_portrait.jpg
+Image size: (3251, 3810), Using pyramid: True, Metric: ncc, Edges: True
+G:(29, 78), R:(37, 176)
+Saved result to out4_self_portrait.jpg
 
 Image size: (2600, 3055), Using pyramid: True, Metric: ncc, Edges: True
 G:(-6, 49), R:(-24, 96)
