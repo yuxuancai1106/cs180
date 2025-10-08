@@ -1,0 +1,23 @@
+# Exclude code directories from all projects
+Proj_0/code/
+Proj_1/code/
+Proj_2/code/
+Proj_3/code/
+
+# Exclude any other code-related files
+*.py
+*.pyc
+__pycache__/
+*.npy
+*.txt
+*.md
+requirements.txt
+
+# Keep only images, HTML, and PDF files
+!*.html
+!*.jpg
+!*.jpeg
+!*.png
+!*.gif
+!*.pdf
+!*.tif

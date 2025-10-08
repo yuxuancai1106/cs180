@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Project 3A: Image Mosaics and Homographies — CS180</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        margin: 0;
+        padding: 40px;
+        line-height: 1.7;
+        background: linear-gradient(135deg, #f5f5f5 0%, #e0e0e0 100%);
+        min-height: 100vh;
+        color: #333;
+    }
+    
+    .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 20px;
+        padding: 60px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        backdrop-filter: blur(10px);
+    }
+    
+    header {
+        display: flex;
+        align-items: center;
+        gap: 30px;
+        margin-bottom: 50px;
+        padding-bottom: 30px;
+        border-bottom: 3px solid #666;
+    }
+    
+    .header-text h1 { 
+        font-size: 2.5rem; 
+        margin: 0; 
+        color: #2c3e50;
+        font-weight: 700;
+        background: linear-gradient(135deg, #666, #999);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+    
+    .header-text .subtitle {
+        font-size: 1.1rem;
+        color: #666;
+        margin-top: 8px;
+        font-weight: 500;
+    }
+    
+    h2 { 
+        margin-top: 50px; 
+        margin-bottom: 25px; 
+        color: #2c3e50; 
+        font-size: 1.8rem;
+        font-weight: 600;
+        padding: 15px 25px;
+        background: linear-gradient(135deg, #f9f9f9, #e9e9e9);
+        border-radius: 12px;
+        border-left: 5px solid #666;
+    }
+    
+    h3 { 
+        margin-top: 35px; 
+        color: #444; 
+        font-size: 1.3rem;
+        font-weight: 600;
+        border-bottom: 2px solid #eee;
+        padding-bottom: 8px;
+    }
+    
+    h4 {
+        color: #555;
+        font-size: 1.1rem;
+        margin-top: 25px;
+        font-weight: 600;
+    }
+    
+    p { 
+        color: #444; 
+        font-size: 1.05rem;
+        margin-bottom: 20px;
+        text-align: justify;
+    }
+    
+    ul, ol {
+        color: #444;
+        font-size: 1.05rem;
+        line-height: 1.8;
+    }
+    
+    li {
+        margin-bottom: 8px;
+    }
+    
+    .image-row { 
+        display: flex; 
+        gap: 30px; 
+        flex-wrap: wrap; 
+        justify-content: center; 
+        margin: 40px 0; 
+    }
+    
+    figure { 
+        width: 280px; 
+        text-align: center; 
+        margin: 0;
+        background: white;
+        border-radius: 15px;
+        padding: 20px;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    
+    figure:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+    }
+    
+    figure img { 
+        width: 100%; 
+        height: auto; 
+        border-radius: 10px;
+        margin-bottom: 15px;
+    }
+    
+    figcaption { 
+        font-size: 0.95rem; 
+        color: #666; 
+        font-weight: 500;
+        line-height: 1.4;
+    }
+    
+    .full-width-figure {
+        width: 100%;
+        max-width: 1000px;
+        margin: 40px auto;
+        text-align: center;
+        background: white;
+        border-radius: 15px;
+        padding: 30px;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    }
+    
+    .full-width-figure img {
+        width: 100%;
+        height: auto;
+        border-radius: 10px;
+    }
+    
+    .full-width-figure figcaption {
+        font-size: 1rem;
+        color: #666;
+        font-weight: 500;
+        margin-top: 15px;
+        line-height: 1.5;
+    }
+    
+    .code-block {
+        background: #2d2d2d;
+        color: #f8f8f2;
+        padding: 25px;
+        border-radius: 12px;
+        font-family: 'Courier New', monospace;
+        font-size: 0.9rem;
+        line-height: 1.6;
+        overflow-x: auto;
+        margin: 25px 0;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    }
+    
+    .matrix-display {
+        background: #f8f9fa;
+        padding: 25px;
+        border-radius: 12px;
+        border-left: 5px solid #666;
+        margin: 25px 0;
+        overflow-x: auto;
+        font-family: 'Courier New', monospace;
+        font-size: 1rem;
+        line-height: 1.8;
+    }
+    
+    .highlight-box {
+        background: #fff8e1;
+        border-left: 5px solid #ff9800;
+        padding: 20px;
+        margin: 25px 0;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(255, 152, 0, 0.1);
+    }
+    
+    .info-box {
+        background: #e3f2fd;
+        border-left: 5px solid #2196f3;
+        padding: 20px;
+        margin: 25px 0;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(33, 150, 243, 0.1);
+    }
+    
+    .step-number {
+        display: inline-block;
+        background: #666;
+        color: white;
+        width: 40px;
+        height: 40px;
+        line-height: 40px;
+        border-radius: 50%;
+        text-align: center;
+        font-weight: bold;
+        margin-right: 15px;
+        font-size: 1.1rem;
+    }
+    
+    .comparison-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 30px;
+        margin: 40px 0;
+    }
+    
+    @media (max-width: 768px) {
+        .comparison-grid {
+            grid-template-columns: 1fr;
+        }
+        .image-row {
+            flex-direction: column;
+            align-items: center;
+        }
+        figure {
+            width: 100%;
+            max-width: 400px;
+        }
+        .container {
+            padding: 30px;
+        }
+    }
+    
+    .back-link {
+        display: inline-block;
+        background: linear-gradient(135deg, #666, #999);
+        color: white;
+        text-decoration: none;
+        padding: 12px 25px;
+        border-radius: 25px;
+        font-weight: 600;
+        margin-bottom: 30px;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    }
+    
+    .back-link:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+    }
+    
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 25px 0;
+        background: white;
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+    
+    th, td {
+        padding: 15px;
+        text-align: left;
+        border-bottom: 1px solid #eee;
+    }
+    
+    th {
+        background: #666;
+        color: white;
+        font-weight: 600;
+    }
+    
+    tr:hover {
+        background: #f8f9fa;
+    }
+    
+    .footer {
+        text-align: center;
+        padding: 40px 0;
+        color: #666;
+        border-top: 2px solid #eee;
+        margin-top: 60px;
+        font-size: 0.95rem;
+    }
+</style>
+</head>
+<body>
+    <div class="container">
+        <a href="../../index.html" class="back-link">← Back to Portfolio</a>
+        
+        <header>
+            <div class="header-text">
+                <h1>Project 3A: Image Mosaics and Homographies</h1>
+                <div class="subtitle">Yuxuan Cai | UC Berkeley | Fall 2025</div>
+            </div>
+        </header>
+
+        <!-- Introduction -->
+        <h2>Overview</h2>
+        <p>
+            This project explores the mathematical foundations and practical implementation of image mosaicing through 
+            homographic transformations. The primary objective is to seamlessly stitch multiple photographs with overlapping 
+            fields of view into a unified panoramic image. This process requires a deep understanding of projective 
+            geometry, precise correspondence point selection, robust homography computation via least-squares optimization, 
+            and sophisticated blending techniques to eliminate visible seams.
+        </p>
+        <p>
+            The implementation pipeline consists of four interconnected stages: (1) manual correspondence point selection 
+            using an interactive interface, (2) homography matrix computation through singular value decomposition, 
+            (3) image warping via inverse mapping with bilinear interpolation, and (4) alpha-feathered blending on a 
+            global canvas to produce seamless panoramic mosaics.
+        </p>
+
+        <!-- A.1: Shoot and Digitize Pictures -->
+        <h2><span class="step-number">A.1</span>Shoot and Digitize Pictures</h2>
+        
+        <p>
+            I captured multiple sets of photographs with projective transformations between them by fixing the center 
+            of projection and rotating the camera while capturing photos. Each set has 40-70% overlap as recommended, 
+            with images taken close together in time to minimize subject movement and lighting changes.
+        </p>
+
+        <h3>Image Set 1: Sproul Hall Panorama</h3>
+        <p>
+            Two overlapping views of Sproul Hall on the UC Berkeley campus, captured with approximately 50% overlap. 
+            The images were taken from slightly different positions with the camera rotated around a fixed center of projection.
+        </p>
+        
+        <div class="image-row">
+            <figure>
+                <img src="../images/sproul_left.jpeg" alt="Sproul Left">
+                <figcaption>Sproul Hall - Left View<br>
+                <small>Resolution: 4032 × 3024 pixels</small></figcaption>
+            </figure>
+            <figure>
+                <img src="../images/sproul_right.jpeg" alt="Sproul Right">
+                <figcaption>Sproul Hall - Right View<br>
+                <small>Resolution: 4032 × 3024 pixels</small></figcaption>
+            </figure>
+        </div>
+
+        <h3>Image Set 2: Wheeler Hall Panorama</h3>
+        <p>
+            Two overlapping views of Wheeler Hall, another prominent building on campus. This set demonstrates 
+            the pipeline's robustness across different architectural scenes and lighting conditions.
+        </p>
+        
+        <div class="image-row">
+            <figure>
+                <img src="../images/wheeler_left.jpeg" alt="Wheeler Left">
+                <figcaption>Wheeler Hall - Left View<br>
+                <small>Resolution: 4032 × 3024 pixels</small></figcaption>
+            </figure>
+            <figure>
+                <img src="../images/wheeler_right.jpeg" alt="Wheeler Right">
+                <figcaption>Wheeler Hall - Right View<br>
+                <small>Resolution: 4032 × 3024 pixels</small></figcaption>
+            </figure>
+        </div>
+
+        <!-- A.2: Recover Homographies -->
+        <h2><span class="step-number">A.2</span>Recover Homographies</h2>
+        
+        <h3>Methodology</h3>
+        <p>
+            The foundation of accurate image alignment lies in identifying corresponding feature points across images 
+            with overlapping content. I developed an interactive point selection tool 
+            function, which enables precise manual identification of matching features between image pairs. The tool 
+            displays images sequentially and captures mouse click coordinates, ensuring that points are selected in 
+            corresponding order.
+        </p>
+        
+        <div class="highlight-box">
+            <strong>Key Learning:</strong> The quality and spatial distribution of correspondence points critically 
+            determine the accuracy of the computed homography. Points should be well-distributed across the overlap 
+            region and selected on high-contrast, geometrically stable features such as architectural corners, window 
+            frames, and building edges. I used 6 correspondence pairs to provide sufficient constraints while maintaining robustness against minor selection errors.
+        </div>
+
+        <h3>Correspondence Visualization</h3>
+        <p>
+            I manually selected 6 pairs of corresponding points for each image set, focusing on distinctive architectural 
+            features visible in both images. The points were chosen to span the entire overlap region to ensure robust 
+            homography estimation.
+        </p>
+
+        <h4>Sproul Hall Correspondences</h4>
+        <div class="image-row">
+            <figure>
+                <img src="../results/correspondence_visualization.jpg" alt="Sproul Correspondences">
+                <figcaption>Sproul Hall - Point Correspondences<br>
+                <small>6 pairs of corresponding points selected</small></figcaption>
+            </figure>
+        </div>
+
+        <h4>Wheeler Hall Correspondences</h4>
+        <div class="image-row">
+            <figure>
+                <img src="../results/wheeler_correspondences.jpg" alt="Wheeler Correspondences">
+                <figcaption>Wheeler Hall - Point Correspondences<br>
+                <small>6 pairs of corresponding points selected</small></figcaption>
+            </figure>
+        </div>
+        
+        <div class="info-box">
+            <strong>Point Selection Strategy:</strong> I prioritized corner features and high-contrast edges that 
+            are easily identifiable in both images. The selected points include building corners, window edges, 
+            and architectural details that exhibit minimal motion parallax.
+        </div>
+
+        <h3>System of Equations</h3>
+        <p>
+            For each correspondence pair (x, y) ↔ (x', y'), we set up two linear equations by cross-multiplying 
+            the projective equations. With 6 point pairs, we get 12 equations for 8 unknowns (after normalization):
+        </p>
+
+        <div class="matrix-display">
+            <pre>For each point pair (x, y) ↔ (x', y'):
+Row 1: [x  y  1  0  0  0  -x'x  -x'y  -x'] · h = 0
+Row 2: [0  0  0  x  y  1  -y'x  -y'y  -y'] · h = 0
+
+Where h = [h₁₁, h₁₂, h₁₃, h₂₁, h₂₂, h₂₃, h₃₁, h₃₂, h₃₃]ᵀ
+
+This creates the overdetermined system: Ah = 0</pre>
+        </div>
+
+        <h3>Computed Homography Matrices</h3>
+        
+        <h4>Sproul Hall Homography</h4>
+        <div class="matrix-display">
+            <pre>H_sproul = [[ 1.7323   -0.0421  -2159.23]
+           [ 0.3341    1.5110   -867.07]
+           [ 0.00018   0.00002    1.0000]]</pre>
+        </div>
+
+        <h4>Wheeler Hall Homography</h4>
+        <div class="matrix-display">
+            <pre>H_wheeler = [[ 2.2078   -0.0341  -3316.20]
+            [ 0.5454    1.9036  -1530.97]
+            [ 0.00029   0.00004    1.0000]]</pre>
+        </div>
+
+        <div class="info-box">
+            <strong>Matrix Interpretation:</strong> Both homographies show similar characteristics - diagonal scaling 
+            elements, small rotation/shear terms, and large translation components. The perspective terms are small 
+            but non-zero, capturing subtle projective distortions from the camera rotation around a fixed center of projection.
+        </div>
+
+        <!-- A.3: Warp the Images -->
+        <h2><span class="step-number">A.3</span>Warp the Images</h2>
+        
+        <h3>Two Interpolation Methods</h3>
+        <p>
+            I implemented both required interpolation methods from scratch using inverse warping to avoid holes 
+            in the output image. Inverse warping guarantees that every output pixel receives a value by computing 
+            the corresponding location in the source image using H⁻¹.
+        </p>
+
+        <h4>1. Nearest Neighbor Interpolation</h4>
+        <p>
+            For each output pixel, round the source coordinates to the nearest integer pixel and sample directly.
+            This method is fast but produces blocky, aliased results.
+        </p>
+
+        <h4>2. Bilinear Interpolation</h4>
+        <p>
+            For each output pixel, interpolate from the four nearest integer neighbors using distance-weighted averaging:
+        </p>
+
+        <div class="matrix-display">
+            <pre>Let: x₁ = ⌊x⌋,  x₂ = x₁ + 1,  y₁ = ⌊y⌋,  y₂ = y₁ + 1
+     wₓ = x - x₁ (horizontal weight)
+     wᵧ = y - y₁ (vertical weight)
+
+I(x,y) = (1-wₓ)(1-wᵧ)·I(x₁,y₁) + wₓ(1-wᵧ)·I(x₂,y₁) + 
+         (1-wₓ)wᵧ·I(x₁,y₂) + wₓwᵧ·I(x₂,y₂)</pre>
+        </div>
+
+        <h3>Comparison of Interpolation Methods</h3>
+        <div class="image-row">
+            <figure>
+                <img src="../results/warped_nn_sproul.jpg" alt="Nearest Neighbor">
+                <figcaption>Nearest Neighbor Interpolation<br>
+                </figcaption>
+            </figure>
+            <figure>
+                <img src="../results/warped_bil_sproul.jpg" alt="Bilinear">
+                <figcaption>Bilinear Interpolation<br>
+                </figcaption>
+            </figure>
+        </div>
+
+
+
+
+        <!-- A.4: Blend Images into Mosaic -->
+        <h2><span class="step-number">A.4</span>Blend Images into a Mosaic</h2>
+        
+        <h3>Global Canvas Strategy</h3>
+        <p>
+            Creating a seamless mosaic requires establishing a global coordinate system that accommodates both 
+            images after transformation. I compute the global canvas by projecting all four corners of each 
+            image through their respective homographies and determining the minimum bounding box. This ensures 
+            the canvas is large enough to contain both transformed images without clipping.
+        </p>
+
+        <div class="matrix-display">
+            <pre>Canvas computation:
+   1. Transform all corners: c'ᵢ = H · cᵢ for each corner
+   2. Find global bounds: xₘᵢₙ = min(all x'), xₘₐₓ = max(all x')
+                         yₘᵢₙ = min(all y'), yₘₐₓ = max(all y')
+   3. Canvas size: width = xₘₐₓ - xₘᵢₙ, height = yₘₐₓ - yₘᵢₙ</pre>
+        </div>
+
+        <h3>Alpha Feathering for Seamless Blending</h3>
+        <p>
+            Simple pixel averaging in overlap regions often produces visible seams due to exposure variations, 
+            vignetting, and residual alignment errors. I implemented <strong>alpha feathering</strong>, where 
+            each pixel's contribution is weighted by its distance from image boundaries. The alpha map transitions 
+            smoothly from 1.0 at the image center to 0.0 at the edges:
+        </p>
+
+        <div class="matrix-display">
+            <pre>For each pixel (x, y):
+  distance_to_edge = min(x, y, width-x, height-y)
+  α(x,y) = clip(distance_to_edge / (feather_ratio × min(width,height)/2), 0, 1)
+
+Final pixel value:
+  I_mosaic = (I₁ · α₁ + I₂ · α₂) / (α₁ + α₂)</pre>
+        </div>
+
+        <p>
+            I used a feather_ratio of 0.2, which creates a smooth transition zone spanning approximately 20% 
+            of the shorter image dimension from each edge. This produces natural-looking blends without visible 
+            seam artifacts.
+        </p>
+
+        <div class="highlight-box">
+            <strong>Key Learning:</strong> Alpha feathering is superior to hard-edged blending or simple averaging 
+            because it gradually transitions between images in the overlap region. Pixels near image centers 
+            (high confidence regions) receive higher weights, while edge pixels (lower confidence due to distortion 
+            and vignetting) receive lower weights. This creates seamless transitions even with slight exposure or 
+            alignment variations.
+        </div>
+
+        <h3>Canvas Positioning Details</h3>
+        <div class="matrix-display">
+            <pre>Global Canvas Computation:
+  Canvas bounds: (-10, -778) to (6564, 3623)
+  Canvas size: 6574 × 4401 pixels
+  
+Image Placement:
+  Image 1 position: (10, 778) to (4042, 3802)
+  Image 2 warped position: (1263, 10) to (6564, 4391)
+  
+Overlap region: ~2800 pixels horizontal overlap
+Processing time: 6.89 seconds</pre>
+        </div>
+
+        <h3>Intermediate Processing Steps</h3>
+        <p>
+            The following visualizations show how each image is positioned on the global canvas before blending:
+        </p>
+        
+        <div class="image-row">
+            <figure>
+                <img src="../results/canvas1_sproul_fixed.jpg" alt="Canvas 1">
+                <figcaption>Image 1 placed on global canvas</figcaption>
+            </figure>
+            <figure>
+                <img src="../results/canvas2_sproul_fixed.jpg" alt="Canvas 2">
+                <figcaption>Image 2 warped and placed on global canvas</figcaption>
+            </figure>
+        </div>
+
+        <h3>Alpha Map Visualization</h3>
+        <p>
+            The alpha blending weights show how each image contributes to the final mosaic. Red represents 
+            Image 2's alpha map, green represents Image 1's alpha map, and yellow indicates overlap regions 
+            where both images contribute:
+        </p>
+        <h3>Complete Mosaics</h3>
+        <p>
+            I created two different mosaics to demonstrate the pipeline's versatility across different scenes 
+            and lighting conditions. Each mosaic uses weighted averaging with alpha feathering to eliminate edge artifacts.
+        </p>
+
+        <h4>Mosaic 1: Sproul Hall Panorama</h4>
+        <div class="full-width-figure">
+            <img src="../results/mosaic_sproul_fixed.jpg" alt="Sproul Mosaic">
+            <figcaption>Complete Panoramic Mosaic of Sproul Hall<br>
+            <small>Final resolution: 6574 × 4401 pixels </small></figcaption>
+        </div>
+
+        <h4>Mosaic 2: Wheeler Hall Panorama</h4>
+        <div class="full-width-figure">
+            <img src="../results/mosaic_wheeler_fixed.jpg" alt="Wheeler Mosaic">
+            <figcaption>Complete Panoramic Mosaic of Wheeler Hall<br>
+            <small>Final resolution: 5301 × 4381 pixels</small></figcaption>
+        </div>
+        
+        <div class="info-box">
+            <strong>Note on Wheeler Mosaic:</strong> The Wheeler Hall mosaic shows some blending artifacts in areas where 
+            students were moving during the image capture process. This demonstrates a limitation of the current 
+            approach when dealing with dynamic scenes - the homography assumes a static scene, so moving objects 
+            in the overlap region can create ghosting or double-exposure effects in the final mosaic.
+        </div>
+
+
+        <div class="highlight-box">
+            <strong>Blending Procedure:</strong> All mosaics use the same sophisticated blending approach: (1) Global 
+            canvas prediction by projecting all image corners through homographies, (2) Alpha feathering with 
+            distance-based weights that fall off from image centers to edges, (3) Weighted averaging in overlap 
+            regions to eliminate visible seams, and (4) Gaussian blur for smoother transitions. This procedure 
+            produces professional-quality results that rival commercial panorama software.
+        </div>
+
+
+
+        <!-- Technical Insights -->
+        <h2>Technical Insights and Challenges</h2>
+        
+        <h3>Key Learnings</h3>
+        <ul>
+            <li><strong>Correspondence Point Quality:</strong> The accuracy of manual point selection directly 
+            impacts alignment quality. I learned that corner features and high-contrast edges provide more reliable 
+            correspondences than low-contrast or poorly-defined features. Small errors (±2-3 pixels) in point 
+            selection propagate through the homography computation but are mitigated by using overdetermined systems.</li>
+         
+            <li><strong>Blending Techniques:</strong> Simple averaging in overlap regions produces visible seams 
+            even with perfect geometric alignment. Alpha feathering with distance-based weights creates professional 
+            results by accounting for exposure variations, vignetting, and minor alignment errors.</li>
+              </ul>
+
+        <h3>Challenges Encountered and Solutions</h3>
+        <ul>
+            <li><strong>Homography Direction Ambiguity:</strong> The most significant challenge was determining 
+            the correct direction for the homography. Initially, H mapped Image 2 to the left of Image 1 instead 
+            of to the right. This occurred because the homography maps points from Image 2 → Image 1, but for 
+            mosaic creation we needed Image 1 → Image 2 mapping. 
+            <br><strong>Solution:</strong> Implemented automatic detection by transforming Image 2's center point 
+            and checking if it lands left or right of Image 1's center. If left, the code automatically uses H⁻¹. 
+            This diagnostic approach (shown in console output: "H maps Image 2 to the LEFT... Using H_inv") made 
+            the pipeline robust to correspondence point ordering.</li>
+            
+            <li><strong>Canvas Bounds Computation:</strong> Computing correct global canvas bounds required careful 
+            consideration of how all image corners transform. Initially attempted to place images sequentially, 
+            which caused clipping when warped images extended into negative coordinates.
+            <br><strong>Solution:</strong> Project all corners of all images through their homographies first, 
+            find the global min/max, then apply consistent translation offsets to place everything in positive 
+            coordinates. This ensures the entire panorama fits within the canvas.</li>
+            
+            <li><strong>Alpha Map Warping:</strong> Initially applied feathering to already-warped images, which 
+            created incorrect blend weights due to the warping distorting the distance-to-edge metric.
+            <br><strong>Solution:</strong> Create alpha maps on the original images before warping, then warp 
+            the alpha maps using the same homography. This preserves the correct geometric relationship between 
+            pixel positions and their edge distances.</li>
+
+
+        </ul>
+
+        <!-- Conclusion -->
+        <h2>Conclusion</h2>
+        <p>
+            This project successfully implemented a complete image mosaicing pipeline from first principles, 
+            demonstrating both theoretical understanding and practical implementation skills. The resulting 
+            panoramas of Sproul Hall and Wheeler Hall showcase seamless stitching that rivals commercial panorama 
+            software, achieved through careful attention to mathematical rigor, algorithmic correctness, and 
+            sophisticated blending techniques.
+        </p>
+        <p>
+            The experience reinforced several key lessons applicable to computer vision broadly: (1) geometric 
+            transformations require careful coordinate system management, (2) mathematical elegance (SVD-based 
+            least squares) often provides the most robust practical solutions, (3) the final 10% of quality 
+            (seamless blending) requires as much effort as the first 90% (geometric alignment), and (4) debugging 
+            and diagnostic tools (visualization, automatic checks) are essential for building reliable vision systems.
+        </p>
+
+
+
+        <div class="footer">
+            <p><strong>CS180 Project 3A: Image Mosaics and Homographies</strong></p>
+            <p>Yuxuan Cai | UC Berkeley | Fall 2025</p>
+        
+        </div>
+    </div>
+</body>
+</html>

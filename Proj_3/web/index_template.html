@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CS180 Proj3A: Image Warping and Mosaicing</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 3px solid #3498db;
+            padding-bottom: 10px;
+        }
+        h2 {
+            color: #34495e;
+            margin-top: 40px;
+            margin-bottom: 20px;
+            border-left: 4px solid #3498db;
+            padding-left: 15px;
+        }
+        h3 {
+            color: #2c3e50;
+            margin-top: 30px;
+            margin-bottom: 15px;
+        }
+        .image-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+        .image-container {
+            text-align: center;
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #e9ecef;
+        }
+        .image-container img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 5px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .image-caption {
+            margin-top: 10px;
+            font-weight: bold;
+            color: #495057;
+        }
+        .step {
+            background-color: #f8f9fa;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            border-left: 4px solid #28a745;
+        }
+        .results-section {
+            background-color: #e8f5e8;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            border: 1px solid #c3e6c3;
+        }
+        .math-section {
+            background-color: #fff3cd;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            border: 1px solid #ffeaa7;
+        }
+        .code-block {
+            background-color: #2d3748;
+            color: #e2e8f0;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            overflow-x: auto;
+            margin: 10px 0;
+        }
+        .highlight {
+            background-color: #fff3cd;
+            padding: 2px 4px;
+            border-radius: 3px;
+        }
+        .file-list {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            border: 1px solid #dee2e6;
+        }
+        .file-list ul {
+            margin: 0;
+            padding-left: 20px;
+        }
+        .file-list li {
+            margin: 5px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>CS180 Proj3A: Image Warping and Mosaicing</h1>
+        
+        <h2>Project Overview</h2>
+        <p>This project implements image warping and mosaicing using homography transformations. The goal is to create seamless panoramic images by aligning and blending multiple photographs of the same scene taken from different viewpoints.</p>
+        
+        <h2>Mathematical Foundation</h2>
+        <div class="math-section">
+            <h3>Homography Matrix</h3>
+            <p>A homography is a 3×3 matrix that represents a projective transformation between two planes. It maps points from one image to another using the equation:</p>
+            <div class="code-block">
+x' = (H[0,0]*x + H[0,1]*y + H[0,2]) / (H[2,0]*x + H[2,1]*y + H[2,2])
+y' = (H[1,0]*x + H[1,1]*y + H[1,2]) / (H[2,0]*x + H[2,1]*y + H[2,2])
+            </div>
+            
+            <h3>Direct Linear Transform (DLT)</h3>
+            <p>To compute the homography matrix, we use the DLT algorithm:</p>
+            <ol>
+                <li>Select 6+ corresponding point pairs between images</li>
+                <li>Set up linear system Ah = 0 where A is 2n×9 and h is the 9-vector of homography entries</li>
+                <li>Solve using SVD to find the null space</li>
+                <li>Reshape h into 3×3 homography matrix H</li>
+            </ol>
+        </div>
+
+        <h2>Implementation Steps</h2>
+        
+        <div class="step">
+            <h3>Step 1: Point Selection</h3>
+            <p>Interactive selection of 6 corresponding points between the left and right images using matplotlib's ginput() function.</p>
+            <div class="image-grid">
+                <div class="image-container">
+                    <img src="../images/sproul_left.jpeg" alt="Sproul Left">
+                    <div class="image-caption">Sproul Building - Left View</div>
+                </div>
+                <div class="image-container">
+                    <img src="../images/sproul_right.jpeg" alt="Sproul Right">
+                    <div class="image-caption">Sproul Building - Right View</div>
+                </div>
+            </div>
+            <p><strong>Selected Points:</strong> 6 corresponding feature points (corners, edges, distinctive features) were manually selected to establish correspondence between the two images.</p>
+        </div>
+
+        <div class="step">
+            <h3>Step 2: Homography Computation</h3>
+            <p>Computation of the 3×3 homography matrix using the Direct Linear Transform (DLT) algorithm with point normalization for numerical stability.</p>
+            <div class="math-section">
+                <h4>Computed Homography Matrix H:</h4>
+                <div class="code-block">
+<!-- HOMOGRAPHY_MATRIX_PLACEHOLDER -->
+                </div>
+                <p>The homography matrix transforms points from the right image coordinate system to the left image coordinate system.</p>
+            </div>
+        </div>
+
+        <div class="step">
+            <h3>Step 3: Image Warping</h3>
+            <p>Warping of the right image into the left image's coordinate system using bilinear interpolation for smooth results.</p>
+            <div class="image-grid">
+                <div class="image-container">
+                    <img src="../results/warped_image1.jpg" alt="Warped Image 1">
+                    <div class="image-caption">Left Image (Reference)</div>
+                </div>
+                <div class="image-container">
+                    <img src="../results/warped_image2.jpg" alt="Warped Image 2">
+                    <div class="image-caption">Right Image (Warped)</div>
+                </div>
+            </div>
+            <p><strong>Warping Process:</strong> Inverse warping with bilinear interpolation ensures smooth, high-quality results without holes or artifacts.</p>
+        </div>
+
+        <div class="step">
+            <h3>Step 4: Mosaic Creation</h3>
+            <p>Creation of seamless panoramic mosaic using weighted alpha blending with edge-based feathering.</p>
+            <div class="image-grid">
+                <div class="image-container">
+                    <img src="../results/canvas1_sproul_fixed.jpg" alt="Canvas 1">
+                    <div class="image-caption">Left Image on Canvas</div>
+                </div>
+                <div class="image-container">
+                    <img src="../results/canvas2_sproul_fixed.jpg" alt="Canvas 2">
+                    <div class="image-caption">Right Image Warped on Canvas</div>
+                </div>
+                <div class="image-container">
+                    <img src="../results/mosaic_sproul_fixed.jpg" alt="Final Mosaic">
+                    <div class="image-caption">Final Seamless Mosaic</div>
+                </div>
+            </div>
+            <p><strong>Blending Technique:</strong> Edge-based alpha masks with feathering create smooth transitions in overlapping regions, eliminating visible seams.</p>
+        </div>
+
+        <h2>Results</h2>
+        <div class="results-section">
+            <h3>Final Mosaic</h3>
+            <div class="image-container">
+                <img src="../results/mosaic_sproul_fixed.jpg" alt="Final Sproul Mosaic" style="max-width: 100%; height: auto;">
+                <div class="image-caption">Complete Sproul Building Panorama</div>
+            </div>
+            <p>The final mosaic successfully combines both images into a seamless panoramic view of the Sproul building, with smooth blending in the overlap region and no visible artifacts.</p>
+        </div>
+
+        <h2>Technical Details</h2>
+        <div class="file-list">
+            <h3>Project Files</h3>
+            <ul>
+                <li><strong>step1_select_points.py</strong> - Interactive point selection</li>
+                <li><strong>step2_compute_homography.py</strong> - DLT homography computation</li>
+                <li><strong>step3_warp_images.py</strong> - Bilinear image warping</li>
+                <li><strong>step4_create_mosaic.py</strong> - Alpha-blended mosaic creation</li>
+                <li><strong>proj3_partA.py</strong> - Helper functions and utilities</li>
+            </ul>
+        </div>
+
+        <h2>Key Features</h2>
+        <ul>
+            <li>✅ Interactive point selection with visual feedback</li>
+            <li>✅ Robust homography computation with normalization</li>
+            <li>✅ High-quality bilinear interpolation warping</li>
+            <li>✅ Edge-based alpha blending for seamless results</li>
+            <li>✅ Complete panoramic view preservation</li>
+            <li>✅ Professional-quality output</li>
+        </ul>
+
+        <h2>Conclusion</h2>
+        <p>This project successfully demonstrates the complete pipeline for image warping and mosaicing, from point selection through final panoramic creation. The implementation produces high-quality, seamless mosaics that preserve all image content while creating smooth transitions in overlapping regions.</p>
+        
+        <div style="text-align: center; margin-top: 40px; color: #7f8c8d;">
+            <p>CS180 Computer Vision - Image Warping and Mosaicing Project</p>
+        </div>
+    </div>
+</body>
+</html>
