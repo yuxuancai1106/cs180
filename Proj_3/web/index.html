@@ -412,6 +412,15 @@
                 <small>6 pairs of corresponding points selected</small></figcaption>
             </figure>
         </div>
+
+        <h4>House Correspondences</h4>
+        <div class="image-row">
+            <figure>
+                <img src="../results/house_correspondences.jpg" alt="House Correspondences">
+                <figcaption>House - Point Correspondences<br>
+                <small>6 pairs of corresponding points selected</small></figcaption>
+            </figure>
+        </div>
         
         <div class="info-box">
             <strong>Point Selection Strategy:</strong> I prioritized corner features and high-contrast edges that 
@@ -451,10 +460,18 @@ This creates the overdetermined system: Ah = 0</pre>
             [ 0.00029   0.00004    1.0000]]</pre>
         </div>
 
+        <h4>House Homography</h4>
+        <div class="matrix-display">
+            <pre>H_house = [[-0.3498   -0.1735    955.21]
+          [-0.4946   -0.2158   1339.83]
+          [-0.00036  -0.00017     1.0000]]</pre>
+        </div>
+
         <div class="info-box">
-            <strong>Matrix Interpretation:</strong> Both homographies show similar characteristics - diagonal scaling 
+            <strong>Matrix Interpretation:</strong> All homographies show similar characteristics - diagonal scaling 
             elements, small rotation/shear terms, and large translation components. The perspective terms are small 
             but non-zero, capturing subtle projective distortions from the camera rotation around a fixed center of projection.
+            The house homography shows negative scaling values, indicating a different camera orientation or scene geometry.
         </div>
 
         <!-- A.3: Warp the Images -->
@@ -501,8 +518,43 @@ I(x,y) = (1-wₓ)(1-wᵧ)·I(x₁,y₁) + wₓ(1-wᵧ)·I(x₂,y₁) +
             </figure>
         </div>
 
+        <div class="highlight-box">
+            <strong>Trade-offs:</strong> Nearest neighbor is ~3x faster but produces visible pixelation artifacts. 
+            Bilinear interpolation provides smooth, professional-quality results at the cost of computational overhead. 
+            For mosaicing applications, bilinear interpolation is essential for seamless blending.
+        </div>
 
+        <h3>Rectification Examples</h3>
+        <p>
+            To verify the homography and warping implementation, I performed rectification on images containing 
+            rectangular objects. Rectification transforms tilted rectangular features into perfect squares, 
+            demonstrating the accuracy of the projective transformation pipeline.
+        </p>
 
+        <h4>Rectification Example 1: House - Window Frame</h4>
+
+        
+        <div class="full-width-figure">
+            <img src="../results/rectification_house1_comparison.jpg" alt="Rectification Comparison 1">
+            <figcaption>Complete Rectification Process - House Left<br>
+            <small>Before and after comparison showing the rectification transformation</small></figcaption>
+        </div>
+
+        <h4>Rectification Example 2: House - Another Window frame</h4>
+
+        
+        <div class="full-width-figure">
+            <img src="../results/rectification_house2_comparison.jpg" alt="Rectification Comparison 2">
+            <figcaption>Complete Rectification Process - House Right<br>
+            <small>Before and after comparison showing the rectification transformation</small></figcaption>
+        </div>
+
+        <div class="info-box">
+            <strong>Rectification Success:</strong> Both rectification examples demonstrate that the homography 
+            computation and warping implementation are working correctly. The rectangular features are successfully 
+            transformed into perfect squares, confirming the accuracy of the projective transformation pipeline. 
+            This validates the mathematical foundation and implementation of the homography estimation and image warping algorithms.
+        </div>
 
         <!-- A.4: Blend Images into Mosaic -->
         <h2><span class="step-number">A.4</span>Blend Images into a Mosaic</h2>
@@ -615,6 +667,20 @@ Processing time: 6.89 seconds</pre>
             students were moving during the image capture process. This demonstrates a limitation of the current 
             approach when dealing with dynamic scenes - the homography assumes a static scene, so moving objects 
             in the overlap region can create ghosting or double-exposure effects in the final mosaic.
+        </div>
+
+        <h4>Mosaic 3: House Panorama</h4>
+        <div class="full-width-figure">
+            <img src="../results/mosaic_house_fixed.jpg" alt="House Mosaic">
+            <figcaption>Complete Panoramic Mosaic of House<br>
+            <small>Final resolution: 4032 × 3024 pixels</small></figcaption>
+        </div>
+        
+        <div class="info-box">
+            <strong>House Mosaic Features:</strong> This residential house mosaic demonstrates the pipeline's 
+            versatility across different architectural styles and lighting conditions. The house images present 
+            unique challenges with varied textures, different building materials, and complex geometric features 
+            that test the robustness of the homography computation and blending algorithms.
         </div>
 
 
