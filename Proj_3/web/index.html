@@ -1043,21 +1043,28 @@ This ensures corners are both distinctive and spatially distributed.</pre>
             a robust method to estimate the homography while automatically identifying and rejecting outliers.
         </p>
 
-        <h4>RANSAC Algorithm and Mathematical Foundation</h4>
+        <h4>Automatic Homography Estimation Pipeline</h4>
         <p>
-            RANSAC iteratively samples small subsets of correspondences, computes homographies, and evaluates 
-            how well each homography explains the full set of matches:
+            From the B.3 feature matches $(P_i \leftrightarrow Q_i)$, I implement a complete automatic homography 
+            estimation pipeline using 4-point RANSAC. This robust approach automatically handles outliers and 
+            produces reliable homographies for seamless image mosaicing.
+        </p>
+
+        <h5>4-Point RANSAC Implementation</h5>
+        <p>
+            The RANSAC algorithm iteratively estimates homographies by randomly sampling minimal point sets:
         </p>
 
         <div class="matrix-display">
             <p><strong>RANSAC Process:</strong></p>
             <ol>
-                <li>Randomly select 4 point pairs (minimum for homography)</li>
-                <li>Compute homography $H$ using Direct Linear Transform (DLT)</li>
-                <li>Count inliers: points where $||H \cdot p_1 - p_2|| < \text{threshold}$</li>
-                <li>Keep best homography (most inliers)</li>
-                <li>Repeat for max_iterations or until convergence</li>
-                <li>Recompute final homography using all inliers</li>
+                <li><strong>Random Sampling:</strong> Each iteration randomly samples 4 correspondences $(P_i, Q_i)$</li>
+                <li><strong>Degeneracy Check:</strong> Skip degenerate quads with near-zero area to ensure numerical stability</li>
+                <li><strong>Homography Fitting:</strong> Compute $H$ using both normalized DLT and $Ah=b$ methods, keeping the best result</li>
+                <li><strong>Inlier Scoring:</strong> Evaluate all matches using reprojection error: $||HP-Q||_2$</li>
+                <li><strong>Threshold Test:</strong> Count inliers where error $< 3$ pixels (configurable threshold)</li>
+                <li><strong>Model Selection:</strong> Keep the homography with the largest inlier count</li>
+                <li><strong>Final Estimation:</strong> Re-estimate $H$ on all inliers using the chosen estimator</li>
             </ol>
             
             <p><strong>Mathematical Foundation:</strong></p>
@@ -1065,11 +1072,52 @@ This ensures corners are both distinctive and spatially distributed.</pre>
             <p>$$\begin{bmatrix} x' \\ y' \\ 1 \end{bmatrix} = \begin{bmatrix} h_{11} & h_{12} & h_{13} \\ h_{21} & h_{22} & h_{23} \\ h_{31} & h_{32} & h_{33} \end{bmatrix} \begin{bmatrix} x \\ y \\ 1 \end{bmatrix}$$</p>
             
             <p><strong>Reprojection Error:</strong></p>
-            <p>$$\text{error} = ||p_2 - H \cdot p_1|| = \sqrt{(x_2 - x_2')^2 + (y_2 - y_2')^2}$$</p>
+            <p>$$\text{error} = ||HP-Q||_2$$</p>
+            <p>This measures how well the homography maps points from image 1 to image 2.</p>
             
             <p><strong>Inlier Criterion:</strong></p>
-            <p>$$\text{error} < \text{threshold} $$</p>
+            <p>$$\text{error} < \text{threshold} \quad $$</p>
         </div>
+
+        <h5>Implementation Parameters and Configuration</h5>
+        <p>
+            The implementation exposes several configurable parameters for fine-tuning performance:
+        </p>
+
+        <ul>
+            <li><strong>--iters (default 3000):</strong> Maximum RANSAC iterations. Higher values increase success probability but slow processing.</li>
+            <li><strong>--thresh (default 3.0):</strong> Inlier threshold in pixels. Lower values are stricter but may reject valid matches.</li>
+            <li><strong>--method (normalized/Ahb):</strong> Choose between normalized DLT or $Ah=b$ homography estimation methods.</li>
+            <li><strong>--one_sided:</strong> Use reprojection error $||HP-Q||$ for faster computation (default behavior).</li>
+        </ul>
+
+        <h5>Mosaicing Integration</h5>
+        <p>
+            For automatic mosaicing, the estimated homography is integrated into a complete stitching pipeline:
+        </p>
+
+        <div class="matrix-display">
+            <p><strong>Mosaicing Process:</strong></p>
+            <ol>
+                <li><strong>Reference Selection:</strong> Choose a reference image and set $H_{ref} = I$ (identity matrix)</li>
+                <li><strong>Global Canvas:</strong> Compose each non-reference homography $H$ to the global canvas coordinate system</li>
+                <li><strong>Canvas Bounds:</strong> Compute global canvas by warping all image corners and applying translation offset</li>
+                <li><strong>Image Warping:</strong> Inverse-warp each image using bilinear interpolation (--nn option for nearest-neighbor)</li>
+                <li><strong>Alpha Blending:</strong> Blend images using feathered alpha averaging where alpha falls off toward edges</li>
+            </ol>
+        </div>
+
+        <h5>Quality Assessment and Visualization</h5>
+        <p>
+            The implementation provides comprehensive logging and visualization capabilities:
+        </p>
+
+        <ul>
+            <li><strong>Inlier Statistics:</strong> Logs inlier counts, ratios, and convergence information for each image pair</li>
+            <li><strong>Match Visualization:</strong> Saves per-pair inlier visualizations with green (inlier) vs red (outlier) matches</li>
+            <li><strong>Performance Metrics:</strong> Tracks processing time, iteration counts, and success rates</li>
+            <li><strong>Debug Output:</strong> Provides detailed information about homography quality and geometric consistency</li>
+        </ul>
 
         <h4>Parameter Tuning and Effects</h4>
         <p>
