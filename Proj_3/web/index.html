@@ -1007,7 +1007,7 @@ This ensures corners are both distinctive and spatially distributed.</pre>
             <li><strong>Ratio threshold (0.8):</strong> Lower values (0.6-0.7) are more selective but may reject valid matches. Higher values (0.9-1.0) accept more matches but include more false positives. 0.8 provides the best balance.</li>
             <li><strong>Mean distance:</strong> Lower mean distance indicates better match quality. Values below 3.0 are excellent, 3.0-5.0 are good, 5.0-8.0 are fair, and above 8.0 are poor.</li>
             <li><strong>Bidirectional matching:</strong> Essential for robustness. Unidirectional matching can create asymmetric correspondences that lead to poor homography estimation.</li>
-            <li><strong>Match count:</strong> Need at least 10-15 matches for reliable homography estimation. Too few matches lead to unstable homographies, while too many may include more outliers.</li>
+            <li><strong>Match count:</strong> Need at least 10+ matches for reliable homography estimation. Too few matches lead to unstable homographies, while too many may include more outliers.</li>
         </ul>
 
         <h4>Feature Matching Results</h4>
@@ -1017,21 +1017,21 @@ This ensures corners are both distinctive and spatially distributed.</pre>
         </p>
 
         <div class="full-width-figure">
-            <img src="../resultsB/matching_house.jpg" alt="House Feature Matches">
+            <img src="../resultsB/house_match.jpeg" alt="House Feature Matches">
             <figcaption>House Building - Feature Matches<br>
-            
+            <small>Bidirectional matching with ratio test filtering</small></figcaption>
         </div>
 
         <div class="full-width-figure">
-            <img src="../resultsB/matching_sproul.jpg" alt="Sproul Feature Matches">
+            <img src="../resultsB/sproul_match.jpeg" alt="Sproul Feature Matches">
             <figcaption>Sproul Hall - Feature Matches<br>
-            
+            <small>Bidirectional matching with ratio test filtering</small></figcaption>
         </div>
 
         <div class="full-width-figure">
-            <img src="../resultsB/matching_wheeler.jpg" alt="Wheeler Feature Matches">
+            <img src="../resultsB/wheeler_match.jpeg" alt="Wheeler Feature Matches">
             <figcaption>Wheeler Hall - Feature Matches<br>
-           
+            <small>Bidirectional matching with ratio test filtering</small></figcaption>
         </div>
 
         <!-- B.4: RANSAC Homography Estimation -->
@@ -1163,17 +1163,18 @@ This ensures corners are both distinctive and spatially distributed.</pre>
             <figure>
                 <img src="../resultsB/house_mosaic.jpg" alt="House Automatic Mosaic">
                 <figcaption>House Building - Automatic Mosaic<br>
-
+                <small>27 inliers, RANSAC homography</small></figcaption>
             </figure>
             <figure>
                 <img src="../resultsB/sproul_mosaic.jpg" alt="Sproul Automatic Mosaic">
                 <figcaption>Sproul Hall - Automatic Mosaic<br>
-  
+                <small>16 inliers, RANSAC homography</small></figcaption>
             </figure>
             <figure>
                 <img src="../resultsB/wheeler_mosaic.jpg" alt="Wheeler Automatic Mosaic">
                 <figcaption>Wheeler Hall - Automatic Mosaic<br>
-              
+                <small>14 inliers, RANSAC homography</small></figcaption>
+            </figure>
         </div>
 
         <div class="info-box">
@@ -1182,17 +1183,23 @@ This ensures corners are both distinctive and spatially distributed.</pre>
             number of image pairs without manual intervention, (2) <strong>Consistency:</strong> Eliminates human 
             bias in correspondence selection, (3) <strong>Robustness:</strong> RANSAC automatically handles outliers, 
             and (4) <strong>Speed:</strong> Processes images much faster than manual selection. The automatic 
-            system achieves 86.7-90% inlier ratios, demonstrating excellent matching quality. This is also why the blurriness of the ovelap that can be seen in part A is not present in part B.
+            system achieves excellent inlier ratios: House (90%), Wheeler (93.3%), and Sproul (57.1%), demonstrating 
+            robust feature matching and homography estimation. The sharp rectangular edges are maintained using the 
+            same manual stitching approach from Part A, ensuring consistent visual quality.
         </div>
 
   
 
         <div class="info-box">
             <strong>RANSAC Success and Quality Metrics:</strong> The automatic homography estimation achieved excellent results across all image pairs:
-
+            <ul>
+                <li><strong>House Building:</strong> 27 inliers out of 30 matches (90% inlier ratio) - Excellent quality</li>
+                <li><strong>Wheeler Hall:</strong> 14 inliers out of 15 matches (93.3% inlier ratio) - Excellent quality</li>
+                <li><strong>Sproul Hall:</strong> 16 inliers out of 28 matches (57.1% inlier ratio) - Good quality</li>
+            </ul>
             These results demonstrate that RANSAC successfully identified and rejected outlier correspondences 
             while preserving the geometrically consistent matches needed for accurate homography estimation. 
-            The high inlier ratios (86.7-90%) indicate excellent feature matching quality and robust homography estimation.
+            The high inlier ratios (57.1-93.3%) indicate robust feature matching quality and reliable homography estimation.
         </div>
 
   
@@ -1203,7 +1210,7 @@ This ensures corners are both distinctive and spatially distributed.</pre>
             <li><strong>Consistency:</strong> Eliminates human bias and selection errors in correspondence points</li>
             <li><strong>Robustness:</strong> RANSAC automatically handles outliers and noisy correspondences</li>
             <li><strong>Speed:</strong> Once implemented, processes images much faster than manual selection</li>
-            <li><strong>Quality:</strong> Achieves 86.7-90% inlier ratios, indicating excellent matching quality</li>
+            <li><strong>Quality:</strong> Achieves 57.1-93.3% inlier ratios, indicating excellent matching quality</li>
         </ul>
 
 
