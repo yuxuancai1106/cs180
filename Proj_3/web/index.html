@@ -1163,17 +1163,17 @@ This ensures corners are both distinctive and spatially distributed.</pre>
             <figure>
                 <img src="../resultsB/house_mosaic.jpg" alt="House Automatic Mosaic">
                 <figcaption>House Building - Automatic Mosaic<br>
-                <small>27 inliers, RANSAC homography</small></figcaption>
+                <small>22 inliers, RANSAC homography</small></figcaption>
             </figure>
             <figure>
                 <img src="../resultsB/sproul_mosaic.jpg" alt="Sproul Automatic Mosaic">
                 <figcaption>Sproul Hall - Automatic Mosaic<br>
-                <small>16 inliers, RANSAC homography</small></figcaption>
+                <small>17 inliers, RANSAC homography</small></figcaption>
             </figure>
             <figure>
                 <img src="../resultsB/wheeler_mosaic.jpg" alt="Wheeler Automatic Mosaic">
                 <figcaption>Wheeler Hall - Automatic Mosaic<br>
-                <small>14 inliers, RANSAC homography</small></figcaption>
+                <small>13 inliers, RANSAC homography</small></figcaption>
             </figure>
         </div>
 
@@ -1183,7 +1183,7 @@ This ensures corners are both distinctive and spatially distributed.</pre>
             number of image pairs without manual intervention, (2) <strong>Consistency:</strong> Eliminates human 
             bias in correspondence selection, (3) <strong>Robustness:</strong> RANSAC automatically handles outliers, 
             and (4) <strong>Speed:</strong> Processes images much faster than manual selection. The automatic 
-            system achieves excellent inlier ratios: House (90%), Wheeler (93.3%), and Sproul (57.1%), demonstrating 
+            system achieves good inlier ratios: House (73.3%), Wheeler (86.7%), and Sproul (60.7%), demonstrating 
             robust feature matching and homography estimation. The sharp rectangular edges are maintained using the 
             same manual stitching approach from Part A, ensuring consistent visual quality.
         </div>
@@ -1193,13 +1193,13 @@ This ensures corners are both distinctive and spatially distributed.</pre>
         <div class="info-box">
             <strong>RANSAC Success and Quality Metrics:</strong> The automatic homography estimation achieved excellent results across all image pairs:
             <ul>
-                <li><strong>House Building:</strong> 27 inliers out of 30 matches (90% inlier ratio) - Excellent quality</li>
-                <li><strong>Wheeler Hall:</strong> 14 inliers out of 15 matches (93.3% inlier ratio) - Excellent quality</li>
-                <li><strong>Sproul Hall:</strong> 16 inliers out of 28 matches (57.1% inlier ratio) - Good quality</li>
+                <li><strong>House Building:</strong> 22 inliers out of 30 matches (73.3% inlier ratio) - Good quality</li>
+                <li><strong>Wheeler Hall:</strong> 13 inliers out of 15 matches (86.7% inlier ratio) - Excellent quality</li>
+                <li><strong>Sproul Hall:</strong> 17 inliers out of 28 matches (60.7% inlier ratio) - Good quality</li>
             </ul>
             These results demonstrate that RANSAC successfully identified and rejected outlier correspondences 
             while preserving the geometrically consistent matches needed for accurate homography estimation. 
-            The high inlier ratios (57.1-93.3%) indicate robust feature matching quality and reliable homography estimation.
+            The good inlier ratios (60.7-86.7%) indicate robust feature matching quality and reliable homography estimation.
         </div>
 
   
@@ -1210,7 +1210,7 @@ This ensures corners are both distinctive and spatially distributed.</pre>
             <li><strong>Consistency:</strong> Eliminates human bias and selection errors in correspondence points</li>
             <li><strong>Robustness:</strong> RANSAC automatically handles outliers and noisy correspondences</li>
             <li><strong>Speed:</strong> Once implemented, processes images much faster than manual selection</li>
-            <li><strong>Quality:</strong> Achieves 57.1-93.3% inlier ratios, indicating excellent matching quality</li>
+            <li><strong>Quality:</strong> Achieves 60.7-86.7% inlier ratios, indicating good matching quality</li>
         </ul>
 
 
