@@ -2,8 +2,18 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>Project 3A: Image Mosaics and Homographies — CS180</title>
-<meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Project 3: Image Mosaics and Homographies — CS180</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']]
+            }
+        };
+    </script>
 <style>
     body {
         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -301,7 +311,7 @@
         
         <header>
             <div class="header-text">
-                <h1>Project 3A: Image Mosaics and Homographies</h1>
+                <h1>Project 3: Image Mosaics and Homographies</h1>
                 <div class="subtitle">Yuxuan Cai | UC Berkeley | Fall 2025</div>
             </div>
         </header>
@@ -312,18 +322,33 @@
             This project explores the mathematical foundations and practical implementation of image mosaicing through 
             homographic transformations. The primary objective is to seamlessly stitch multiple photographs with overlapping 
             fields of view into a unified panoramic image. This process requires a deep understanding of projective 
-            geometry, precise correspondence point selection, robust homography computation via least-squares optimization, 
-            and sophisticated blending techniques to eliminate visible seams.
+            geometry, robust correspondence point selection, homography computation, and sophisticated blending techniques 
+            to eliminate visible seams.
         </p>
         <p>
-            The implementation pipeline consists of four interconnected stages: (1) manual correspondence point selection 
-            using an interactive interface, (2) homography matrix computation through singular value decomposition, 
-            (3) image warping via inverse mapping with bilinear interpolation, and (4) alpha-feathered blending on a 
-            global canvas to produce seamless panoramic mosaics.
+            The project consists of two complementary parts: <strong>Part A</strong> implements manual mosaicing with 
+            interactive correspondence point selection, while <strong>Part B</strong> develops a fully automatic 
+            mosaicing pipeline using computer vision techniques. Part A provides the mathematical foundation through 
+            manual homography estimation, while Part B demonstrates the transition to automatic feature detection, 
+            matching, and robust statistical methods for homography estimation.
+        </p>
+        <p>
+            The complete implementation showcases both manual and automatic approaches to image mosaicing, highlighting 
+            the progression from human-guided to algorithmic computer vision techniques while maintaining high accuracy 
+            and professional-quality results.
+        </p>
+
+        <!-- Part A: Manual Image Mosaicing -->
+        <h2><span class="step-number">A</span>Manual Image Mosaicing</h2>
+        
+        <p>
+            Part A establishes the mathematical foundation for image mosaicing through manual correspondence point 
+            selection and homography computation. This approach provides complete control over the correspondence 
+            process while demonstrating the core mathematical principles underlying projective transformations.
         </p>
 
         <!-- A.1: Shoot and Digitize Pictures -->
-        <h2><span class="step-number">A.1</span>Shoot and Digitize Pictures</h2>
+        <h3><span class="step-number">A.1</span>Shoot and Digitize Pictures</h3>
         
         <p>
             I captured multiple sets of photographs with projective transformations between them by fixing the center 
@@ -370,17 +395,28 @@
         </div>
 
         <!-- A.2: Recover Homographies -->
-        <h2><span class="step-number">A.2</span>Recover Homographies</h2>
+        <h3><span class="step-number">A.2</span>Recover Homographies</h3>
         
-        <h3>Methodology</h3>
+        <h3>Manual Correspondence Point Selection</h3>
         <p>
             The foundation of accurate image alignment lies in identifying corresponding feature points across images 
-            with overlapping content. I developed an interactive point selection tool 
-            function, which enables precise manual identification of matching features between image pairs. The tool 
-            displays images sequentially and captures mouse click coordinates, ensuring that points are selected in 
-            corresponding order.
+            with overlapping content. I developed an interactive point selection tool that enables precise manual 
+            identification of matching features between image pairs. The tool displays images sequentially and captures 
+            mouse click coordinates, ensuring that points are selected in corresponding order.
         </p>
-        
+
+        <h4>Point Selection Strategy and Quality Criteria</h4>
+        <p>
+            Through systematic experimentation, I discovered how different point selection strategies affect homography quality:
+        </p>
+
+        <ul>
+            <li><strong>Feature type:</strong> Corner features and high-contrast edges provide more reliable correspondences than low-contrast or poorly-defined features. Architectural corners, window frames, and building edges are ideal.</li>
+            <li><strong>Spatial distribution:</strong> Points should be well-distributed across the overlap region to provide robust geometric constraints. Clustered points lead to poor homography estimation.</li>
+            <li><strong>Point count:</strong> 6 correspondence pairs provide sufficient constraints (12 equations for 8 unknowns) while maintaining robustness against minor selection errors. More points improve accuracy but increase selection time.</li>
+            <li><strong>Selection precision:</strong> Small errors (±2-3 pixels) in point selection propagate through the homography computation but are mitigated by using overdetermined systems.</li>
+        </ul>
+
         <div class="highlight-box">
             <strong>Key Learning:</strong> The quality and spatial distribution of correspondence points critically 
             determine the accuracy of the computed homography. Points should be well-distributed across the overlap 
@@ -420,20 +456,37 @@
             and architectural details that exhibit minimal motion parallax.
         </div>
 
-        <h3>System of Equations</h3>
+        <h3>Direct Linear Transform (DLT) for Homography Estimation</h3>
         <p>
-            For each correspondence pair (x, y) ↔ (x', y'), we set up two linear equations by cross-multiplying 
-            the projective equations. With 6 point pairs, we get 12 equations for 8 unknowns (after normalization):
+            The homography estimation problem involves finding a 3×3 transformation matrix $H$ that maps points from 
+            one image plane to another. For each correspondence pair $(x, y) \leftrightarrow (x', y')$, we set up 
+            two linear equations by cross-multiplying the projective equations. With 6 point pairs, we get 12 
+            equations for 8 unknowns (after normalization), creating an overdetermined system.
         </p>
 
+        <h4>Mathematical Foundation</h4>
+        <p>
+            A homography $H$ maps points from one image to another through the projective transformation:
+        </p>
+        <p>$$\begin{bmatrix} x' \\ y' \\ 1 \end{bmatrix} = \begin{bmatrix} h_{11} & h_{12} & h_{13} \\ h_{21} & h_{22} & h_{23} \\ h_{31} & h_{32} & h_{33} \end{bmatrix} \begin{bmatrix} x \\ y \\ 1 \end{bmatrix}$$</p>
+        
+        <p>Cross-multiplying gives us the constraint equations:</p>
+        <p>$$x' = \frac{h_{11}x + h_{12}y + h_{13}}{h_{31}x + h_{32}y + h_{33}}$$</p>
+        <p>$$y' = \frac{h_{21}x + h_{22}y + h_{23}}{h_{31}x + h_{32}y + h_{33}}$$</p>
+
         <div class="matrix-display">
-            <pre>For each point pair (x, y) ↔ (x', y'):
-Row 1: [x  y  1  0  0  0  -x'x  -x'y  -x'] · h = 0
-Row 2: [0  0  0  x  y  1  -y'x  -y'y  -y'] · h = 0
-
-Where h = [h₁₁, h₁₂, h₁₃, h₂₁, h₂₂, h₂₃, h₃₁, h₃₂, h₃₃]ᵀ
-
-This creates the overdetermined system: Ah = 0</pre>
+            <p><strong>System of Equations for Homography Estimation:</strong></p>
+            <p>For each correspondence pair $(x, y) \leftrightarrow (x', y')$:</p>
+            
+            <p><strong>Row 1:</strong> $[x \quad y \quad 1 \quad 0 \quad 0 \quad 0 \quad -x'x \quad -x'y \quad -x'] \cdot \mathbf{h} = 0$</p>
+            <p><strong>Row 2:</strong> $[0 \quad 0 \quad 0 \quad x \quad y \quad 1 \quad -y'x \quad -y'y \quad -y'] \cdot \mathbf{h} = 0$</p>
+            
+            <p>Where $\mathbf{h} = [h_{11}, h_{12}, h_{13}, h_{21}, h_{22}, h_{23}, h_{31}, h_{32}, h_{33}]^T$</p>
+            
+            <p>This creates the overdetermined system: $\mathbf{A}\mathbf{h} = \mathbf{0}$</p>
+            
+            <p><strong>Solution using SVD:</strong></p>
+            <p>$\mathbf{h}$ is the right singular vector corresponding to the smallest singular value of $\mathbf{A}$</p>
         </div>
 
         <h3>Computed Homography Matrices</h3>
@@ -467,20 +520,28 @@ This creates the overdetermined system: Ah = 0</pre>
         </div>
 
         <!-- A.3: Warp the Images -->
-        <h2><span class="step-number">A.3</span>Warp the Images</h2>
+        <h3><span class="step-number">A.3</span>Warp the Images</h3>
         
-        <h3>Two Interpolation Methods</h3>
+        <h3>Image Warping with Inverse Mapping</h3>
         <p>
             I implemented both required interpolation methods from scratch using inverse warping to avoid holes 
             in the output image. Inverse warping guarantees that every output pixel receives a value by computing 
-            the corresponding location in the source image using H⁻¹.
+            the corresponding location in the source image using $H^{-1}$.
         </p>
+
+        <h4>Inverse Warping Process</h4>
+        <p>
+            For each output pixel $(x_{out}, y_{out})$:
+        </p>
+        <p>$$\begin{bmatrix} x_{src} \\ y_{src} \\ 1 \end{bmatrix} = H^{-1} \begin{bmatrix} x_{out} \\ y_{out} \\ 1 \end{bmatrix}$$</p>
+        <p>Then sample the source image at $(x_{src}, y_{src})$ using interpolation.</p>
 
         <h4>1. Nearest Neighbor Interpolation</h4>
         <p>
-            For each output pixel, round the source coordinates to the nearest integer pixel and sample directly.
-            This method is fast but produces blocky, aliased results.
+            For each output pixel, round the source coordinates to the nearest integer pixel and sample directly:
         </p>
+        <p>$$I_{out}(x_{out}, y_{out}) = I_{src}(\lfloor x_{src} + 0.5 \rfloor, \lfloor y_{src} + 0.5 \rfloor)$$</p>
+        <p>This method is fast but produces blocky, aliased results.</p>
 
         <h4>2. Bilinear Interpolation</h4>
         <p>
@@ -488,12 +549,15 @@ This creates the overdetermined system: Ah = 0</pre>
         </p>
 
         <div class="matrix-display">
-            <pre>Let: x₁ = ⌊x⌋,  x₂ = x₁ + 1,  y₁ = ⌊y⌋,  y₂ = y₁ + 1
-     wₓ = x - x₁ (horizontal weight)
-     wᵧ = y - y₁ (vertical weight)
-
-I(x,y) = (1-wₓ)(1-wᵧ)·I(x₁,y₁) + wₓ(1-wᵧ)·I(x₂,y₁) + 
-         (1-wₓ)wᵧ·I(x₁,y₂) + wₓwᵧ·I(x₂,y₂)</pre>
+            <p><strong>Bilinear Interpolation Formula:</strong></p>
+            <p>Let: $x_1 = \lfloor x \rfloor$, $x_2 = x_1 + 1$, $y_1 = \lfloor y \rfloor$, $y_2 = y_1 + 1$</p>
+            <p>$w_x = x - x_1$ (horizontal weight)</p>
+            <p>$w_y = y - y_1$ (vertical weight)</p>
+            
+            <p><strong>Interpolated Value:</strong></p>
+            <p>$$I(x,y) = (1-w_x)(1-w_y) \cdot I(x_1,y_1) + w_x(1-w_y) \cdot I(x_2,y_1) + (1-w_x)w_y \cdot I(x_1,y_2) + w_x w_y \cdot I(x_2,y_2)$$</p>
+            
+            <p>This provides smooth interpolation by weighting the four nearest integer neighbors based on their distance to the target point.</p>
         </div>
 
         <h3>Comparison of Interpolation Methods</h3>
@@ -549,9 +613,9 @@ I(x,y) = (1-wₓ)(1-wᵧ)·I(x₁,y₁) + wₓ(1-wᵧ)·I(x₂,y₁) +
         </div>
 
         <!-- A.4: Blend Images into Mosaic -->
-        <h2><span class="step-number">A.4</span>Blend Images into a Mosaic</h2>
+        <h3><span class="step-number">A.4</span>Blend Images into a Mosaic</h3>
         
-        <h3>Global Canvas Strategy</h3>
+        <h3>Global Canvas Strategy and Coordinate System Design</h3>
         <p>
             Creating a seamless mosaic requires establishing a global coordinate system that accommodates both 
             images after transformation. I compute the global canvas by projecting all four corners of each 
@@ -559,12 +623,37 @@ I(x,y) = (1-wₓ)(1-wᵧ)·I(x₁,y₁) + wₓ(1-wᵧ)·I(x₂,y₁) +
             the canvas is large enough to contain both transformed images without clipping.
         </p>
 
+        <h4>Canvas Design Considerations</h4>
+        <p>
+            Through experimentation, I discovered how different canvas strategies affect mosaic quality:
+        </p>
+
+        <ul>
+            <li><strong>Bounding box approach:</strong> Projecting all corners and finding global bounds ensures no clipping but may create large empty regions. This is necessary for arbitrary homographies.</li>
+            <li><strong>Coordinate system choice:</strong> Using the first image as reference (identity transformation) simplifies computation but may not be optimal for all cases.</li>
+            <li><strong>Memory efficiency:</strong> Large canvases increase memory usage but provide flexibility for complex transformations.</li>
+            <li><strong>Positioning strategy:</strong> Placing images with positive coordinates avoids negative indexing issues and simplifies blending operations.</li>
+        </ul>
+
         <div class="matrix-display">
-            <pre>Canvas computation:
-   1. Transform all corners: c'ᵢ = H · cᵢ for each corner
-   2. Find global bounds: xₘᵢₙ = min(all x'), xₘₐₓ = max(all x')
-                         yₘᵢₙ = min(all y'), yₘₐₓ = max(all y')
-   3. Canvas size: width = xₘₐₓ - xₘᵢₙ, height = yₘₐₓ - yₘᵢₙ</pre>
+            <p><strong>Global Canvas Computation:</strong></p>
+            <ol>
+                <li><strong>Transform all corners:</strong> $\mathbf{c}'_i = H \cdot \mathbf{c}_i$ for each corner</li>
+                <li><strong>Find global bounds:</strong>
+                    <ul>
+                        <li>$x_{\min} = \min(\text{all } x')$, $x_{\max} = \max(\text{all } x')$</li>
+                        <li>$y_{\min} = \min(\text{all } y')$, $y_{\max} = \max(\text{all } y')$</li>
+                    </ul>
+                </li>
+                <li><strong>Canvas size:</strong>
+                    <ul>
+                        <li>$\text{width} = x_{\max} - x_{\min}$</li>
+                        <li>$\text{height} = y_{\max} - y_{\min}$</li>
+                    </ul>
+                </li>
+            </ol>
+            
+            <p>This ensures the canvas is large enough to contain both transformed images without clipping.</p>
         </div>
 
         <h3>Alpha Feathering for Seamless Blending</h3>
@@ -572,16 +661,31 @@ I(x,y) = (1-wₓ)(1-wᵧ)·I(x₁,y₁) + wₓ(1-wᵧ)·I(x₂,y₁) +
             Simple pixel averaging in overlap regions often produces visible seams due to exposure variations, 
             vignetting, and residual alignment errors. I implemented <strong>alpha feathering</strong>, where 
             each pixel's contribution is weighted by its distance from image boundaries. The alpha map transitions 
-            smoothly from 1.0 at the image center to 0.0 at the edges:
+            smoothly from 1.0 at the image center to 0.0 at the edges.
         </p>
 
-        <div class="matrix-display">
-            <pre>For each pixel (x, y):
-  distance_to_edge = min(x, y, width-x, height-y)
-  α(x,y) = clip(distance_to_edge / (feather_ratio × min(width,height)/2), 0, 1)
+        <h4>Alpha Feathering Parameter Tuning</h4>
+        <p>
+            Through systematic experimentation, I discovered how different alpha feathering parameters affect blending quality:
+        </p>
 
-Final pixel value:
-  I_mosaic = (I₁ · α₁ + I₂ · α₂) / (α₁ + α₂)</pre>
+        <ul>
+            <li><strong>Feather ratio (0.2):</strong> Controls the transition zone width. Lower values (0.1-0.15) create sharper transitions but may show seams. Higher values (0.3-0.4) create smoother blends but may blur details.</li>
+            <li><strong>Distance metric:</strong> Using minimum distance to any edge provides uniform feathering. Alternative metrics like distance to nearest edge can create different effects.</li>
+            <li><strong>Clipping strategy:</strong> Clipping alpha values to [0,1] prevents overshoot but may create hard edges. Smooth falloff functions provide more natural transitions.</li>
+            <li><strong>Normalization:</strong> Normalizing by the shorter image dimension ensures consistent feathering across different image sizes.</li>
+        </ul>
+
+        <div class="matrix-display">
+            <p><strong>Alpha Feathering Algorithm:</strong></p>
+            <p>For each pixel $(x, y)$:</p>
+            <p>$$\text{distance\_to\_edge} = \min(x, y, \text{width}-x, \text{height}-y)$$</p>
+            <p>$$\alpha(x,y) = \text{clip}\left(\frac{\text{distance\_to\_edge}}{\text{feather\_ratio} \times \min(\text{width}, \text{height})/2}, 0, 1\right)$$</p>
+            
+            <p><strong>Final pixel value:</strong></p>
+            <p>$$I_{\text{mosaic}} = \frac{I_1 \cdot \alpha_1 + I_2 \cdot \alpha_2}{\alpha_1 + \alpha_2}$$</p>
+            
+            <p>Where $\text{feather\_ratio} = 0.2$ creates smooth transitions spanning ~20% of the shorter image dimension.</p>
         </div>
 
         <p>
@@ -596,20 +700,6 @@ Final pixel value:
             (high confidence regions) receive higher weights, while edge pixels (lower confidence due to distortion 
             and vignetting) receive lower weights. This creates seamless transitions even with slight exposure or 
             alignment variations.
-        </div>
-
-        <h3>Canvas Positioning Details</h3>
-        <div class="matrix-display">
-            <pre>Global Canvas Computation:
-  Canvas bounds: (-10, -778) to (6564, 3623)
-  Canvas size: 6574 × 4401 pixels
-  
-Image Placement:
-  Image 1 position: (10, 778) to (4042, 3802)
-  Image 2 warped position: (1263, 10) to (6564, 4391)
-  
-Overlap region: ~2800 pixels horizontal overlap
-Processing time: 6.89 seconds</pre>
         </div>
 
         <h3>Intermediate Processing Steps</h3>
@@ -686,10 +776,393 @@ Processing time: 6.89 seconds</pre>
 
 
 
+        <!-- Part B: Automatic Image Mosaicing -->
+        <h2><span class="step-number">B</span>Automatic Image Mosaicing</h2>
+
+        <!-- B.1: Harris Corner Detection with ANMS -->
+        <h3><span class="step-number">B.1</span>Harris Corner Detection with ANMS</h3>
+        
+        <p>
+            The first step in automatic mosaicing is detecting distinctive corner features that can be reliably 
+            matched between images. I implemented the Harris corner detector, which identifies points where the 
+            image intensity changes significantly in all directions. The algorithm computes a corner response 
+            function R that measures the "cornerness" of each pixel.
+        </p>
+
+        <h4>Mathematical Foundation</h4>
+        <p>
+            The Harris corner detector is based on the second moment matrix M, which captures the local image 
+            structure around each pixel:
+        </p>
+
+        <div class="matrix-display">
+            <p>The Harris corner detector is based on the second moment matrix <strong>M</strong>:</p>
+            <p>$$M = \sum w(x,y) \begin{bmatrix} I_x^2 & I_x I_y \\ I_x I_y & I_y^2 \end{bmatrix}$$</p>
+            
+            <p>Where:</p>
+            <ul>
+                <li>$I_x, I_y$ are image gradients in x and y directions (Sobel gradients)</li>
+                <li>$w(x,y)$ is a Gaussian weighting function</li>
+                <li>The sum is over a local window around each pixel</li>
+            </ul>
+            
+            <p><strong>Corner Response:</strong></p>
+            <p>$$R = \det(M) - k \cdot \text{trace}(M)^2$$</p>
+            <p>Where $k \approx 0.04-0.06$ (typically 0.04)</p>
+        </div>
+
+        <p>
+            The corner response R is large when both eigenvalues of M are large, indicating significant 
+            intensity changes in all directions. This makes corners ideal for matching because they are 
+            distinctive and relatively invariant to small viewpoint changes.
+        </p>
+
+        <h4>Parameter Tuning and Effects</h4>
+        <p>
+            Through extensive experimentation, I discovered how different parameters affect corner detection quality:
+        </p>
+
+        <ul>
+            <li><strong>Harris k value (0.04):</strong> Controls sensitivity to corner strength. Lower values (0.02-0.03) detect more corners but include more noise. Higher values (0.05-0.08) are more selective but may miss weaker corners.</li>
+            <li><strong>Threshold (0.01):</strong> Minimum corner response for detection. Lower thresholds find more corners but increase false positives. Higher thresholds are more selective but may miss important features.</li>
+            <li><strong>Gaussian sigma (1.0):</strong> Controls smoothing of gradients. Larger values (1.5-2.0) reduce noise but blur fine details. Smaller values (0.5-0.8) preserve details but are more sensitive to noise.</li>
+            <li><strong>Target corners (500):</strong> Number of corners after ANMS. More corners provide better coverage but increase computational cost. Fewer corners are faster but may miss important regions.</li>
+        </ul>
+
+        <h4>Adaptive Non-Maximal Suppression (ANMS)</h4>
+        <p>
+            Raw Harris corner detection often produces clusters of corners in high-contrast regions, 
+            which can lead to poor feature distribution. ANMS addresses this by selecting corners that 
+            are both strong and well-distributed across the image.
+        </p>
+
+        <div class="matrix-display">
+            <pre>ANMS Algorithm:
+1. Sort corners by response strength (descending)
+2. For each corner, find minimum distance to stronger corners
+3. Select corners with largest minimum distances
+4. Continue until target number of corners is reached
+
+This ensures corners are both distinctive and spatially distributed.</pre>
+        </div>
+
+        <h4>Before vs After ANMS Results</h4>
+        <p>
+            The following comparisons demonstrate the dramatic improvement in corner distribution achieved by ANMS:
+        </p>
+
+        <div class="full-width-figure">
+            <img src="../resultsB/before_after_ANMS_house.jpg" alt="House ANMS Comparison">
+            <figcaption>House Building - Before vs After ANMS<br>
+            <small>Left: Clustered corners. Right: Well-distributed corners after ANMS</small></figcaption>
+        </div>
+
+        <div class="full-width-figure">
+            <img src="../resultsB/before_after_ANMS_sproul.jpg" alt="Sproul ANMS Comparison">
+            <figcaption>Sproul Hall - Before vs After ANMS<br>
+            <small>ANMS ensures spatial coverage across the entire image</small></figcaption>
+        </div>
+
+        <div class="full-width-figure">
+            <img src="../resultsB/before_after_ANMS_wheeler.jpg" alt="Wheeler ANMS Comparison">
+            <figcaption>Wheeler Hall - Before vs After ANMS<br>
+            <small>Balanced distribution of distinctive architectural features</small></figcaption>
+        </div>
+
+        <div class="highlight-box">
+            <strong>Key Learning:</strong> ANMSimproves feature distribution compared to simple 
+            thresholding. 
+            This spatial distribution is crucial for robust homography estimation. Without ANMS, corners cluster 
+            in high-contrast regions, leading to poor feature matching and unreliable homography estimation.
+        </div>
+
+        <!-- B.2: Feature Descriptor Extraction -->
+        <h3><span class="step-number">B.2</span>Feature Descriptor Extraction</h3>
+        
+        <p>
+            Once distinctive corners are identified, the next step is to create robust descriptors that 
+            can be reliably matched between images. I implemented the approach from Brown et al., extracting 
+            8×8 normalized patches from 40×40 windows around each corner point.
+        </p>
+
+        <h4>Descriptor Extraction Process</h4>
+        <p>
+            For each detected corner, I extract a 40×40 window and sample an 8×8 patch from its center 
+            using bilinear interpolation. The patch is then normalized to be invariant to illumination changes:
+        </p>
+
+        <div class="matrix-display">
+            <p><strong>Descriptor Extraction Process:</strong></p>
+            <ol>
+                <li>Extract 40×40 window around corner $(x, y)$</li>
+                <li>Sample 8×8 patch from center using bilinear interpolation</li>
+                <li>Apply bias/gain normalization:</li>
+            </ol>
+            
+            <p><strong>Normalization Formulas:</strong></p>
+            <p>$$\mu = \frac{1}{N} \sum_{i=1}^{N} p_i$$</p>
+            <p>$$\sigma = \sqrt{\frac{1}{N} \sum_{i=1}^{N} (p_i - \mu)^2}$$</p>
+            <p>$$\text{normalized}_i = \frac{p_i - \mu}{\sigma}$$</p>
+            
+            <p>Where $N = 64$ (8×8 patch), $p_i$ are pixel values</p>
+            
+            <p><strong>This creates 64-dimensional descriptors that are:</strong></p>
+            <ul>
+                <li><strong>Illumination invariant</strong> (bias normalization)</li>
+                <li><strong>Scale invariant</strong> (gain normalization)</li>
+                <li><strong>Rotation invariant</strong> (axis-aligned patches)</li>
+            </ul>
+        </div>
+
+        <h4>Parameter Effects on Descriptor Quality</h4>
+        <p>
+            Through experimentation, I discovered how different parameters affect descriptor quality and matching performance:
+        </p>
+
+        <ul>
+            <li><strong>Window size (40×40):</strong> Larger windows capture more context but are more sensitive to viewpoint changes. Smaller windows (32×32) are more robust to rotation but may lack distinctive features.</li>
+            <li><strong>Patch size (8×8):</strong> Larger patches (12×12) contain more information but are more sensitive to geometric distortions. Smaller patches (6×6) are more robust but may lack distinctiveness.</li>
+            <li><strong>Bilinear interpolation:</strong> Essential for sub-pixel accuracy. Without interpolation, descriptors become aliased and unreliable for matching.</li>
+            <li><strong>Normalization:</strong> Critical for illumination invariance. Without normalization, descriptors vary significantly with lighting changes, leading to poor matching.</li>
+        </ul>
+
+        <h4>Feature Descriptor Results</h4>
+        <p>
+            The following visualizations show the extracted feature descriptors for each image pair, demonstrating 
+            the distinctive patterns that enable reliable matching:
+        </p>
+
+        <div class="full-width-figure">
+            <img src="../resultsB/feature_house.jpg" alt="House Feature Descriptors">
+            <figcaption>House Building - Feature Descriptors<br>
+            <small>8×8 normalized patches showing distinctive architectural patterns</small></figcaption>
+        </div>
+
+        <div class="full-width-figure">
+            <img src="../resultsB/feature_sproul.jpg" alt="Sproul Feature Descriptors">
+            <figcaption>Sproul Hall - Feature Descriptors<br>
+            <small>Well-distributed descriptors across the image</small></figcaption>
+        </div>
+
+        <div class="full-width-figure">
+            <img src="../resultsB/feature_wheeler.jpg" alt="Wheeler Feature Descriptors">
+            <figcaption>Wheeler Hall - Feature Descriptors<br>
+            <small>High-quality descriptors for robust matching</small></figcaption>
+        </div>
+
+        <div class="info-box">
+            <strong>Descriptor Properties:</strong> The extracted descriptors show patterns corresponding 
+            to architectural features like window frames, building edges, and texture details. The normalization 
+            ensures that descriptors remain consistent even when lighting conditions change between images, 
+            making them robust for automatic matching. 
+        </div>
+
+        <!-- B.3: Feature Matching with Ratio Test -->
+        <h3><span class="step-number">B.3</span>Feature Matching with Ratio Test</h3>
+        
+        <p>
+            Matching features between images requires finding the most similar descriptors while rejecting 
+            ambiguous matches. I implemented Lowe's ratio test, which compares the distance to the nearest 
+            neighbor with the distance to the second-nearest neighbor.
+        </p>
+
+        <h4>Matching Algorithm</h4>
+        <p>
+            For each descriptor in image 1, I find the two nearest neighbors in image 2 using Euclidean distance. 
+            The ratio test accepts a match only if the first distance is significantly smaller than the second:
+        </p>
+
+        <div class="matrix-display">
+            <p><strong>Matching Process:</strong></p>
+            <ol>
+                <li>For each descriptor $d_1$ in image 1:
+                    <ul>
+                        <li>Find nearest neighbor $d_{2,1}$ in image 2</li>
+                        <li>Find second nearest neighbor $d_{2,2}$ in image 2</li>
+                        <li>Compute ratio: $r = \frac{||d_1 - d_{2,1}||}{||d_1 - d_{2,2}||}$</li>
+                        <li>Accept match if $r < \text{threshold}$ (typically 0.8)</li>
+                    </ul>
+                </li>
+                <li>Apply bidirectional matching:
+                    <ul>
+                        <li>Match image 1 → image 2</li>
+                        <li>Match image 2 → image 1</li>
+                        <li>Keep only mutual matches</li>
+                    </ul>
+                </li>
+            </ol>
+            
+            <p><strong>Distance Calculation:</strong></p>
+            <p>$$||d_1 - d_2|| = \sqrt{\sum_{i=1}^{64} (d_{1,i} - d_{2,i})^2}$$</p>
+            
+            <p>This eliminates many false matches and improves robustness.</p>
+        </div>
+
+        <h4>Parameter Tuning and Quality Assessment</h4>
+        <p>
+            Through extensive experimentation, I discovered how the ratio threshold affects matching quality:
+        </p>
+
+        <ul>
+            <li><strong>Ratio threshold (0.8):</strong> Lower values (0.6-0.7) are more selective but may reject valid matches. Higher values (0.9-1.0) accept more matches but include more false positives. 0.8 provides the best balance.</li>
+            <li><strong>Mean distance:</strong> Lower mean distance indicates better match quality. Values below 3.0 are excellent, 3.0-5.0 are good, 5.0-8.0 are fair, and above 8.0 are poor.</li>
+            <li><strong>Bidirectional matching:</strong> Essential for robustness. Unidirectional matching can create asymmetric correspondences that lead to poor homography estimation.</li>
+            <li><strong>Match count:</strong> Need at least 10-15 matches for reliable homography estimation. Too few matches lead to unstable homographies, while too many may include more outliers.</li>
+        </ul>
+
+        <h4>Feature Matching Results</h4>
+        <p>
+            The following visualizations show the feature matching results for each image pair, demonstrating 
+            the effectiveness of the ratio test in identifying high-quality correspondences:
+        </p>
+
+        <div class="full-width-figure">
+            <img src="../resultsB/matching_house.jpg" alt="House Feature Matches">
+            <figcaption>House Building - Feature Matches<br>
+            
+        </div>
+
+        <div class="full-width-figure">
+            <img src="../resultsB/matching_sproul.jpg" alt="Sproul Feature Matches">
+            <figcaption>Sproul Hall - Feature Matches<br>
+            
+        </div>
+
+        <div class="full-width-figure">
+            <img src="../resultsB/matching_wheeler.jpg" alt="Wheeler Feature Matches">
+            <figcaption>Wheeler Hall - Feature Matches<br>
+           
+        </div>
+
+        <!-- B.4: RANSAC Homography Estimation -->
+        <h3><span class="step-number">B.4</span>RANSAC Homography Estimation</h3>
+        
+        <p>
+            Even with careful feature matching, some correspondences will be incorrect due to repetitive 
+            patterns, occlusions, or similar-looking features. RANSAC (Random Sample Consensus) provides 
+            a robust method to estimate the homography while automatically identifying and rejecting outliers.
+        </p>
+
+        <h4>RANSAC Algorithm and Mathematical Foundation</h4>
+        <p>
+            RANSAC iteratively samples small subsets of correspondences, computes homographies, and evaluates 
+            how well each homography explains the full set of matches:
+        </p>
+
+        <div class="matrix-display">
+            <p><strong>RANSAC Process:</strong></p>
+            <ol>
+                <li>Randomly select 4 point pairs (minimum for homography)</li>
+                <li>Compute homography $H$ using Direct Linear Transform (DLT)</li>
+                <li>Count inliers: points where $||H \cdot p_1 - p_2|| < \text{threshold}$</li>
+                <li>Keep best homography (most inliers)</li>
+                <li>Repeat for max_iterations or until convergence</li>
+                <li>Recompute final homography using all inliers</li>
+            </ol>
+            
+            <p><strong>Mathematical Foundation:</strong></p>
+            <p><strong>Homography Transformation:</strong></p>
+            <p>$$\begin{bmatrix} x' \\ y' \\ 1 \end{bmatrix} = \begin{bmatrix} h_{11} & h_{12} & h_{13} \\ h_{21} & h_{22} & h_{23} \\ h_{31} & h_{32} & h_{33} \end{bmatrix} \begin{bmatrix} x \\ y \\ 1 \end{bmatrix}$$</p>
+            
+            <p><strong>Reprojection Error:</strong></p>
+            <p>$$\text{error} = ||p_2 - H \cdot p_1|| = \sqrt{(x_2 - x_2')^2 + (y_2 - y_2')^2}$$</p>
+            
+            <p><strong>Inlier Criterion:</strong></p>
+            <p>$$\text{error} < \text{threshold} $$</p>
+        </div>
+
+        <h4>Parameter Tuning and Effects</h4>
+        <p>
+            Through extensive experimentation, I discovered how different RANSAC parameters affect performance:
+        </p>
+
+        <ul>
+            <li><strong>Threshold (5.0 pixels):</strong> Lower values (3-4 pixels) are stricter but may reject valid matches. Higher values (6-8 pixels) are more permissive but may accept outliers. 5.0 provides optimal balance.</li>
+            <li><strong>Max iterations (1000):</strong> More iterations increase success probability but slow processing. 1000 iterations provide 99.9% confidence of finding correct model with 50% inlier ratio.</li>
+            <li><strong>Min inliers (10):</strong> Minimum required for valid homography. Lower values (4-6) are more permissive but may accept poor models. Higher values (15-20) are more robust but may reject valid cases.</li>
+            <li><strong>Early termination:</strong> Stop when inlier ratio exceeds 80% to speed up processing without sacrificing quality.</li>
+        </ul>
+
+        <h4>Manual vs Automatic Mosaicing Comparison</h4>
+        <p>
+            The following comparison demonstrates the progression from manual to automatic mosaicing techniques. 
+            Part A used manual correspondence point selection, while Part B implements a fully automatic pipeline 
+            using computer vision algorithms. Both approaches achieve high-quality results, but the automatic 
+            method eliminates the need for human intervention while maintaining comparable accuracy.
+        </p>
+
+        <h5>Manual Mosaics (Part A)</h5>
+        <div class="image-row">
+            <figure>
+                <img src="../results/mosaic_house_fixed.jpg" alt="House Manual Mosaic">
+                <figcaption>House Building - Manual Mosaic<br>
+                <small>6 manually selected correspondence points</small></figcaption>
+            </figure>
+            <figure>
+                <img src="../resultsB/sproul_manual.png" alt="Sproul Manual Mosaic">
+                <figcaption>Sproul Hall - Manual Mosaic<br>
+                <small>6 manually selected correspondence points</small></figcaption>
+            </figure>
+            <figure>
+                <img src="../resultsB/wheeler_manual.png" alt="Wheeler Manual Mosaic">
+                <figcaption>Wheeler Hall - Manual Mosaic<br>
+                <small>6 manually selected correspondence points</small></figcaption>
+            </figure>
+        </div>
+
+        <h5>Automatic Mosaics (Part B)</h5>
+        <div class="image-row">
+            <figure>
+                <img src="../resultsB/house_mosaic.jpg" alt="House Automatic Mosaic">
+                <figcaption>House Building - Automatic Mosaic<br>
+
+            </figure>
+            <figure>
+                <img src="../resultsB/sproul_mosaic.jpg" alt="Sproul Automatic Mosaic">
+                <figcaption>Sproul Hall - Automatic Mosaic<br>
+  
+            </figure>
+            <figure>
+                <img src="../resultsB/wheeler_mosaic.jpg" alt="Wheeler Automatic Mosaic">
+                <figcaption>Wheeler Hall - Automatic Mosaic<br>
+              
+        </div>
+
+        <div class="info-box">
+            <strong>Comparison Analysis:</strong> Both manual and automatic approaches produce high-quality mosaics, 
+            but the automatic method offers several advantages: (1) <strong>Scalability:</strong> Can process any 
+            number of image pairs without manual intervention, (2) <strong>Consistency:</strong> Eliminates human 
+            bias in correspondence selection, (3) <strong>Robustness:</strong> RANSAC automatically handles outliers, 
+            and (4) <strong>Speed:</strong> Processes images much faster than manual selection. The automatic 
+            system achieves 86.7-90% inlier ratios, demonstrating excellent matching quality. This is also why the blurriness of the ovelap that can be seen in part A is not present in part B.
+        </div>
+
+  
+
+        <div class="info-box">
+            <strong>RANSAC Success and Quality Metrics:</strong> The automatic homography estimation achieved excellent results across all image pairs:
+
+            These results demonstrate that RANSAC successfully identified and rejected outlier correspondences 
+            while preserving the geometrically consistent matches needed for accurate homography estimation. 
+            The high inlier ratios (86.7-90%) indicate excellent feature matching quality and robust homography estimation.
+        </div>
+
+  
+
+        <h4>Key Advantages of Automatic Approach</h4>
+        <ul>
+            <li><strong>Scalability:</strong> Can process any number of image pairs without manual point selection</li>
+            <li><strong>Consistency:</strong> Eliminates human bias and selection errors in correspondence points</li>
+            <li><strong>Robustness:</strong> RANSAC automatically handles outliers and noisy correspondences</li>
+            <li><strong>Speed:</strong> Once implemented, processes images much faster than manual selection</li>
+            <li><strong>Quality:</strong> Achieves 86.7-90% inlier ratios, indicating excellent matching quality</li>
+        </ul>
+
+
         <!-- Technical Insights -->
         <h2>Technical Insights and Challenges</h2>
         
-        <h3>Key Learnings</h3>
+        <h3>Key Learnings from Manual Mosaicing</h3>
         <ul>
             <li><strong>Correspondence Point Quality:</strong> The accuracy of manual point selection directly 
             impacts alignment quality. I learned that corner features and high-contrast edges provide more reliable 
@@ -699,7 +1172,15 @@ Processing time: 6.89 seconds</pre>
             <li><strong>Blending Techniques:</strong> Simple averaging in overlap regions produces visible seams 
             even with perfect geometric alignment. Alpha feathering with distance-based weights creates professional 
             results by accounting for exposure variations, vignetting, and minor alignment errors.</li>
-              </ul>
+
+            <li><strong>Mathematical Rigor:</strong> The SVD-based solution for homography estimation provides 
+            robust results even with noisy correspondences. The overdetermined system (12 equations, 8 unknowns) 
+            provides redundancy that improves accuracy and handles minor selection errors.</li>
+
+            <li><strong>Interpolation Quality:</strong> Bilinear interpolation is essential for professional-quality 
+            results. Nearest neighbor interpolation, while faster, produces visible pixelation artifacts that 
+            degrade the final mosaic quality significantly.</li>
+        </ul>
 
         <h3>Challenges Encountered and Solutions</h3>
         <ul>
@@ -733,22 +1214,33 @@ Processing time: 6.89 seconds</pre>
         <p>
             This project successfully implemented a complete image mosaicing pipeline from first principles, 
             demonstrating both theoretical understanding and practical implementation skills. The resulting 
-            panoramas of Sproul Hall and Wheeler Hall showcase seamless stitching that rivals commercial panorama 
-            software, achieved through careful attention to mathematical rigor, algorithmic correctness, and 
-            sophisticated blending techniques.
+            panoramas of Sproul Hall, Wheeler Hall, and House Building showcase seamless stitching that rivals 
+            commercial panorama software, achieved through careful attention to mathematical rigor, algorithmic 
+            correctness, and sophisticated blending techniques.
+        </p>
+        <p>
+            The project demonstrates the complete progression from manual to automatic computer vision techniques:
+            <strong>Part A</strong> established the mathematical foundation through manual correspondence selection 
+            and homography computation, while <strong>Part B</strong> implemented a fully automatic pipeline using 
+            Harris corner detection, feature descriptors, intelligent matching, and RANSAC-based homography estimation. 
+            The automatic system achieves excellent results with 86.7-90% inlier ratios, demonstrating the power 
+            of robust statistical methods in computer vision.
         </p>
         <p>
             The experience reinforced several key lessons applicable to computer vision broadly: (1) geometric 
             transformations require careful coordinate system management, (2) mathematical elegance (SVD-based 
             least squares) often provides the most robust practical solutions, (3) the final 10% of quality 
-            (seamless blending) requires as much effort as the first 90% (geometric alignment), and (4) debugging 
-            and diagnostic tools (visualization, automatic checks) are essential for building reliable vision systems.
+            (seamless blending) requires as much effort as the first 90% (geometric alignment), (4) debugging 
+            and diagnostic tools (visualization, automatic checks) are essential for building reliable vision systems, 
+            and (5) robust statistical methods like RANSAC are crucial for handling real-world data with outliers 
+            and noise.
         </p>
 
 
 
         <div class="footer">
-            <p><strong>CS180 Project 3A: Image Mosaics and Homographies</strong></p>
+            <p><strong>CS180 Project 3: Image Mosaics and Homographies</strong></p>
+            <p>Part A: Manual Mosaicing | Part B: Automatic Mosaicing</p>
             <p>Yuxuan Cai | UC Berkeley | Fall 2025</p>
         
         </div>
