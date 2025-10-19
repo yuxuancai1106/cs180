@@ -1184,8 +1184,10 @@ This ensures corners are both distinctive and spatially distributed.</pre>
             bias in correspondence selection, (3) <strong>Robustness:</strong> RANSAC automatically handles outliers, 
             and (4) <strong>Speed:</strong> Processes images much faster than manual selection. The automatic 
             system achieves good inlier ratios: House (73.3%), Wheeler (86.7%), and Sproul (60.7%), demonstrating 
-            robust feature matching and homography estimation. The sharp rectangular edges are maintained using the 
-            same manual stitching approach from Part A, ensuring consistent visual quality.
+            robust feature matching and homography estimation. Additionally, the automatic 
+            mosaics exhibit clearer blending with less blurriness in the stitched regions compared to the manual version. 
+            This improved quality results from more precise homography estimation using 15-30 correspondences (vs 4-8 manual), 
+            sub-pixel accuracy in feature detection, and consistent feather alpha blending parameters without human bias.
         </div>
 
   
